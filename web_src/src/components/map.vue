@@ -1,44 +1,48 @@
 <template>
-    <div id="devicePosition" style="width: 100vw; height: 91vh;">
-      <el-container v-if="onOff" style="height: 91vh;" v-loading="isLoging">
-        <el-aside width="400px" style="background-color: #ffffff">
-          <DeviceTree ref="deviceTree" :clickEvent="clickEvent" :contextMenuEvent="contextmenuEventHandler" ></DeviceTree>
-        </el-aside>
-        <el-main style="height: 91vh; padding: 0">
-          <MapComponent ref="map"></MapComponent>
-        </el-main>
-      </el-container>
-      <div v-if="!onOff" style="width: 100%; height:100%; text-align: center; line-height: 5rem">
-        <p>地图功能已关闭</p>
-      </div>
-      <div ref="infobox" v-if="channel != null " >
-        <div v-if="channel != null" class="infobox-content">
-          <el-descriptions class="margin-top" :title="channel.name" :column="1" :colon="true" size="mini" :labelStyle="labelStyle" >
-            <el-descriptions-item label="编号" >{{channel.channelId}}</el-descriptions-item>
-            <el-descriptions-item label="型号">{{channel.model}}</el-descriptions-item>
-            <el-descriptions-item label="经度" >{{channel[longitudeStr]}}</el-descriptions-item>
-            <el-descriptions-item label="纬度" >{{channel[latitudeStr]}}</el-descriptions-item>
-            <el-descriptions-item label="生产厂商">{{channel.manufacture}}</el-descriptions-item>
-            <el-descriptions-item label="行政区域" >{{channel.civilCode}}</el-descriptions-item>
-            <el-descriptions-item label="设备归属" >{{channel.owner}}</el-descriptions-item>
-            <el-descriptions-item label="安装地址" >{{channel.address == null?'未知': channel.address}}</el-descriptions-item>
-            <el-descriptions-item label="云台类型" >{{channel.PTZTypeText}}</el-descriptions-item>
-            <el-descriptions-item label="通道状态">
-              <el-tag size="small" v-if="channel.status === true">在线</el-tag>
-              <el-tag size="small" type="info" v-if="channel.status === false">离线</el-tag>
-            </el-descriptions-item>
-          </el-descriptions>
-          <div style="padding-top: 10px">
-            <el-button v-bind:disabled="device == null || device.online === 0" type="primary" size="small" title="播放" icon="el-icon-video-play" @click="play(channel)"></el-button>
-            <el-button type="primary" size="small" title="编辑位置" icon="el-icon-edit" @click="edit(channel)"></el-button>
-            <el-button type="primary" size="small" title="轨迹查询" icon="el-icon-map-location" @click="getTrace(channel)"></el-button>
-          </div>
-          <span class="infobox-close el-icon-close" @click="closeInfoBox()"></span>
-        </div>
-      </div>
-      <devicePlayer ref="devicePlayer" ></devicePlayer>
-      <queryTrace ref="queryTrace" ></queryTrace>
+  <div id="devicePosition" style="width: 100vw; height: 91vh;">
+    <el-container v-if="onOff" style="height: 91vh;" v-loading="isLoging">
+      <el-aside width="400px" style="background-color: #ffffff">
+        <DeviceTree ref="deviceTree" :clickEvent="clickEvent" :contextMenuEvent="contextmenuEventHandler"></DeviceTree>
+      </el-aside>
+      <el-main style="height: 91vh; padding: 0">
+        <MapComponent ref="map"></MapComponent>
+      </el-main>
+    </el-container>
+    <div v-if="!onOff" style="width: 100%; height:100%; text-align: center; line-height: 5rem">
+      <p>地图功能已关闭</p>
     </div>
+    <div ref="infobox" v-if="channel != null ">
+      <div v-if="channel != null" class="infobox-content">
+        <el-descriptions class="margin-top" :title="channel.gbName" :column="1" :colon="true" size="mini"
+                         :labelStyle="labelStyle">
+          <el-descriptions-item label="平台编号">{{ channel["gbParentId"] }}</el-descriptions-item>
+          <el-descriptions-item label="通道编号">{{ channel["gbDeviceId"] }}</el-descriptions-item>
+          <el-descriptions-item label="型号">{{ channel["gbModel"]}}</el-descriptions-item>
+          <el-descriptions-item label="经纬度">{{ channel["gbLongitude"] }},{{ channel["gbLatitude"] }}</el-descriptions-item>
+          <el-descriptions-item label="生产厂商">{{ channel["gbManufacturer"] }}</el-descriptions-item>
+          <el-descriptions-item label="安装地址">{{ channel["gbAddress"] }}</el-descriptions-item>
+          <el-descriptions-item label="网络地址">{{ channel["gbIpAddress"]+":"+channel["gbPort"] }}</el-descriptions-item>
+<!--          <el-descriptions-item label="安装地址">{{ channel.address == null ? '未知' : channel.address }}</el-descriptions-item>-->
+          <el-descriptions-item label="云台类型">{{ ptzTypeMapping[channel["gbPtzType"]] }}</el-descriptions-item>
+          <el-descriptions-item label="通道状态">
+            <el-tag size="small" v-if="channel['gbStatus'] === 'ON'">在线</el-tag>
+            <el-tag type="danger" size="small" v-if="channel['gbStatus'] === 'OFF'">离线</el-tag>
+          </el-descriptions-item>
+        </el-descriptions>
+        <div style="padding-top: 10px">
+          <el-button v-bind:disabled="channel['gbStatus'] !== 'ON'" type="primary" size="small" title="播放"
+                     icon="el-icon-video-play" @click="play(channel)"></el-button>
+<!--          <el-button type="primary" size="small" title="编辑位置" icon="el-icon-edit"-->
+<!--                     @click="edit(channel)"></el-button>-->
+<!--          <el-button type="primary" size="small" title="轨迹查询" icon="el-icon-map-location"-->
+<!--                     @click="getTrace(channel)"></el-button>-->
+        </div>
+        <span class="infobox-close el-icon-close" @click="closeInfoBox()"></span>
+      </div>
+    </div>
+    <devicePlayer ref="devicePlayer"></devicePlayer>
+    <queryTrace ref="queryTrace"></queryTrace>
+  </div>
 </template>
 
 <script>
@@ -60,7 +64,8 @@ export default {
   },
   data() {
     return {
-      onOff: typeof window.mapParam !== "undefined" && window.mapParam.enable,
+      //onOff: typeof window.mapParam !== "undefined" && window.mapParam.enable,
+      onOff: true,
       deviceService: new DeviceService(),
       layer: null,
       lineLayer: null,
@@ -68,30 +73,43 @@ export default {
       device: null,
       infoBoxId: null,
       labelStyle: {
-        width: "56px"
+        width: "52px"
       },
+
       isLoging: false,
       longitudeStr: "longitude",
       latitudeStr: "latitude",
+
+      ptzTypeMapping: {
+        1: '球机',
+        2: '半球',
+        3: '固定枪机',
+        4: '遥控枪机',
+        5: '遥控半球',
+        6: '多目设备的全景/拼接通道',
+        7: '多目设备的分割通道'
+      }
     };
+
   },
   created() {
     if (this.$route.query.deviceId) {
       console.log(this.$route.query.deviceId)
       // this.$refs.deviceTree.openByDeivceId(this.$route.query.deivceId)
-      setTimeout(()=>{ // 延迟以等待地图加载完成 TODO 后续修改为通过是实际这；状态加回调完成
+      setTimeout(() => { // 延迟以等待地图加载完成 TODO 后续修改为通过是实际这；状态加回调完成
         this.deviceService.getAllChannel(false, false, this.$route.query.deviceId, this.channelsHandler)
       }, 1000)
     }
+    console.log("window.mapParam "+ window.mapParam.coordinateSystem)
     if (window.mapParam.coordinateSystem == "GCJ-02") {
       this.longitudeStr = "longitudeGcj02";
       this.latitudeStr = "latitudeGcj02";
-    }else if (window.mapParam.coordinateSystem == "WGS84") {
+    } else if (window.mapParam.coordinateSystem == "WGS84") {
       this.longitudeStr = "longitudeWgs84";
       this.latitudeStr = "latitudeWgs84";
-    }else {
-      this.longitudeStr = "longitude";
-      this.latitudeStr = "latitude";
+    } else {
+      this.longitudeStr = "gbLongitude";
+      this.latitudeStr = "gbLatitude";
     }
   },
   destroyed() {
@@ -110,12 +128,13 @@ export default {
           console.log(res.data.data)
           console.log(res.data.data.gbLongitude)
           console.log(res.data.data.gbLatitude)
+          console.log("119")
           if (!res.data.data.gbLongitude || !res.data.data.gbLatitude) {
             this.$message.error({
               showClose: true,
               message: "位置信息不存在"
             })
-          }else {
+          } else {
             if (this.layer != null) {
               this.$refs.map.removeLayer(this.layer);
             }
@@ -139,6 +158,7 @@ export default {
     contextmenuEventHandler: function (device, event, data, isCatalog) {
       console.log(device)
       console.log(device.online)
+      console.log("149")
       this.device = device;
       if (data.channelId && !isCatalog) {
         // 点击通道
@@ -176,7 +196,7 @@ export default {
       } else {
         if (typeof data.channelId === "undefined") {
           this.deviceOrSubChannelMenu(event, data)
-        }else {
+        } else {
           // TODO 子目录暂时不支持查询他下面所有设备, 支持支持查询直属于这个目录的设备
           this.deviceOrSubChannelMenu(event, data)
         }
@@ -219,6 +239,7 @@ export default {
     },
     channelsHandler: function (channels) {
       console.log(2)
+      console.log("229")
       if (channels.length > 0) {
         this.clean()
         this.closeInfoBox()
@@ -296,10 +317,12 @@ export default {
       return src;
     },
     featureClickEvent: function (channels) {
+
       this.closeInfoBox()
       if (channels.length > 0) {
         this.channel = channels[0]
       }
+      console.log("featureClickEvent:"+this.channel)
       this.$nextTick(() => {
         let position = [this.channel[this.longitudeStr], this.channel[this.latitudeStr]];
         this.infoBoxId = this.$refs.map.openInfoBox(position, this.$refs.infobox, [0, -50])
@@ -311,10 +334,10 @@ export default {
       }
     },
     play: function (channel) {
-
-      let deviceId = channel.deviceId;
+      console.info("play: "+ JSON.stringify(channel))
+      let deviceId = channel.gbParentId;
       this.isLoging = true;
-      let channelId = channel.channelId;
+      let channelId = channel.gbDeviceId;
       console.log("通知设备推流1：" + deviceId + " : " + channelId);
       let that = this;
       this.$axios({
@@ -371,7 +394,7 @@ export default {
         }
       })
     },
-    clean: function (){
+    clean: function () {
       if (this.lineLayer != null) {
         this.$refs.map.removeLayer(this.lineLayer)
       }
@@ -388,10 +411,10 @@ export default {
 </script>
 
 <style>
-.infobox-content{
+.infobox-content {
   width: 260px;
   background-color: #FFFFFF;
-  padding: 10px;
+  padding: 5px;
   border-radius: 10px;
   border: 1px solid #e2e2e2;
 }
@@ -406,13 +429,15 @@ export default {
   height: 16px;
   background: url('~@static/images/arrow.png') no-repeat center;
 }
+
 .infobox-close {
   position: absolute;
   right: 1rem;
   top: 1rem;
   color: #000000;
-  cursor:pointer
+  cursor: pointer
 }
+
 .el-descriptions__title {
   font-size: 1rem;
   font-weight: 700;

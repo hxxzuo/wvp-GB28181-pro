@@ -1,37 +1,41 @@
 <template>
   <div id="UiHeader">
-
     <el-menu router :default-active="activeIndex" menu-trigger="click" background-color="#001529" text-color="#fff"
              active-text-color="#1890ff" mode="horizontal">
-
+      <el-menu-item style="font-size: 23px;" @click="() => {}">航标可视化系统</el-menu-item>
       <el-menu-item index="/console">控制台</el-menu-item>
       <el-menu-item index="/live">分屏监控</el-menu-item>
-<!--      <el-menu-item index="/map">电子地图</el-menu-item>-->
-      <el-menu-item index="/deviceList">国标设备</el-menu-item>
-      <el-menu-item index="/streamPushList">推流列表</el-menu-item>
-      <el-menu-item index="/streamProxyList">拉流代理</el-menu-item>
+      <el-menu-item index="/map">电子地图</el-menu-item>
+      <el-submenu index="/deviceList">
+        <template slot="title">国标设备</template>
+        <el-menu-item index="/deviceList">设备列表</el-menu-item>
+        <el-menu-item index="/streamPushList">推流列表</el-menu-item>
+        <el-menu-item index="/streamProxyList">拉流代理</el-menu-item>
+        <el-menu-item index="/cloudRecord">云端录像</el-menu-item>
+        <el-menu-item index="/mediaServerManger">节点管理</el-menu-item>
+        <el-menu-item index="/platformList/15/1">国标级联</el-menu-item>
+      </el-submenu>
       <el-submenu index="/channel">
         <template slot="title">通道管理</template>
         <el-menu-item index="/channel/region">行政区划</el-menu-item>
         <el-menu-item index="/channel/group">业务分组</el-menu-item>
       </el-submenu>
-      <el-menu-item index="/cloudRecord">云端录像</el-menu-item>
-      <el-menu-item index="/mediaServerManger">节点管理</el-menu-item>
-      <el-menu-item index="/platformList/15/1">国标级联</el-menu-item>
-      <el-menu-item v-if="editUser" index="/userManager">用户管理</el-menu-item>
-
-      <!--            <el-submenu index="/setting">-->
-      <!--              <template slot="title">系统设置</template>-->
-      <!--              <el-menu-item index="/setting/web">WEB服务</el-menu-item>-->
-      <!--              <el-menu-item index="/setting/sip">国标服务</el-menu-item>-->
-      <!--              <el-menu-item index="/setting/media">媒体服务</el-menu-item>-->
-      <!--            </el-submenu>-->
-      <!--            <el-menu-item style="float: right;" @click="loginout">退出</el-menu-item>-->
+      <el-menu-item index="">航标列表</el-menu-item>
+      <el-menu-item index="">巡视计划</el-menu-item>
+      <el-menu-item index="">识别结果</el-menu-item>
+      <el-submenu index="/setting">
+        <template slot="title">系统设置</template>
+        <el-menu-item v-if="editUser" index="/userManager">用户管理</el-menu-item>
+        <el-menu-item index="/setting/web">WEB服务</el-menu-item>
+        <el-menu-item index="/setting/sip">国标服务</el-menu-item>
+        <el-menu-item index="/setting/media">媒体服务</el-menu-item>
+      </el-submenu>
+      <el-menu-item style="float: right;" @click="loginout">退出</el-menu-item>
       <el-submenu index="" style="float: right;">
         <template slot="title">欢迎，{{ username }}</template>
         <el-menu-item @click="openDoc">在线文档</el-menu-item>
         <el-menu-item>
-          <el-switch v-model="alarmNotify" inactive-text="报警信息推送" @change="alarmNotifyChannge"></el-switch>
+          <el-switch v-model="alarmNotify" inactive-text="报警信息推送" @change="alarmNotifyChange"></el-switch>
         </el-menu-item>
         <el-menu-item @click="changePassword">修改密码</el-menu-item>
         <el-menu-item @click="loginout">注销</el-menu-item>
@@ -52,9 +56,10 @@ export default {
   data() {
     return {
       alarmNotify: false,
+      offlineMap: false,
       sseSource: null,
       username: userService.getUser().username,
-      activeIndex: this.$route.path.indexOf("/", 1)>0?this.$route.path.substring(0, this.$route.path.indexOf("/", 1)):this.$route.path,
+      activeIndex: this.$route.path.indexOf("/", 1) > 0 ? this.$route.path.substring(0, this.$route.path.indexOf("/", 1)) : this.$route.path,
       editUser: userService.getUser() ? userService.getUser().role.id === 1 : false
     };
   },
@@ -70,6 +75,7 @@ export default {
   mounted() {
     window.addEventListener('beforeunload', e => this.beforeunloadHandler(e))
     this.alarmNotify = this.getAlarmSwitchStatus() === "true";
+    // this.offlineMap = this.getOfflineMapStatus() === "true";
 
     // TODO: 此处延迟连接 sse, 避免 sse 连接时 browserId 还未生成, 后续待优化
     setTimeout(() => {
@@ -104,9 +110,12 @@ export default {
     beforeunloadHandler() {
       this.sseSource.close();
     },
-    alarmNotifyChannge() {
+    alarmNotifyChange() {
       this.setAlarmSwitchStatus()
       this.sseControl()
+    },
+    offlineMapChange() {
+      this.setOfflineMapStatus()
     },
     sseControl() {
       let that = this;
@@ -121,12 +130,12 @@ export default {
             title: '报警信息',
             dangerouslyUseHTMLString: true,
             message: `<strong>设备名称：</strong> <i> ${data.deviceName}</i>` +
-                     `<br><strong>设备编号：</strong> <i>${ data.deviceId}</i>` +
-                     `<br><strong>通道编号：</strong> <i>${ data.channelId}</i>` +
-                     `<br><strong>报警级别：</strong> <i>${ data.alarmPriorityDescription}</i>` +
-                     `<br><strong>报警方式：</strong> <i>${ data.alarmMethodDescription}</i>` +
-                     `<br><strong>报警类型：</strong> <i>${ data.alarmTypeDescription}</i>` +
-                     `<br><strong>报警时间：</strong> <i>${ data.alarmTime}</i>`,
+              `<br><strong>设备编号：</strong> <i>${data.deviceId}</i>` +
+              `<br><strong>通道编号：</strong> <i>${data.channelId}</i>` +
+              `<br><strong>报警级别：</strong> <i>${data.alarmPriorityDescription}</i>` +
+              `<br><strong>报警方式：</strong> <i>${data.alarmMethodDescription}</i>` +
+              `<br><strong>报警类型：</strong> <i>${data.alarmTypeDescription}</i>` +
+              `<br><strong>报警时间：</strong> <i>${data.alarmTime}</i>`,
             type: 'warning',
             position: 'bottom-right',
             duration: 5000
@@ -160,7 +169,7 @@ export default {
     },
     setAlarmSwitchStatus() {
       localStorage.setItem("alarmSwitchStatus", this.alarmNotify);
-    }
+    },
   },
   destroyed() {
     window.removeEventListener('beforeunload', e => this.beforeunloadHandler(e))
@@ -192,13 +201,16 @@ export default {
   color: #fff !important;
   background-color: #1890ff !important;
 }
+
 #UiHeader .el-submenu.is-active {
   background-color: #1890ff !important;
 }
+
 #UiHeader .el-submenu.is-active .el-submenu__title {
   color: #fff !important;
   background-color: #1890ff !important;
 }
+
 #UiHeader .el-submenu.is-active .el-submenu__icon-arrow {
   color: #fff !important;
 }

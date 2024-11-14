@@ -1,5 +1,5 @@
 <template>
-  <el-container style="height: 100%">
+  <el-container style="height: 100%;width: 100%">
     <el-header>
       <ui-header/>
     </el-header>

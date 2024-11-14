@@ -19,9 +19,9 @@ spring:
     # [必须修改] 端口号
     port: 6379
     # [可选] 数据库 DB
-    database: 7
+#    database: 7
     # [可选] 访问密码,若你的redis服务器没有设置密码，就不需要用密码去连接
-    password: luna
+#    password: luna
     # [可选] 超时时间
     timeout: 10000
     # mysql数据源
@@ -34,7 +34,7 @@ spring:
           driver-class-name: com.mysql.cj.jdbc.Driver
           url: jdbc:mysql://127.0.0.1:3306/wvp2?useUnicode=true&characterEncoding=UTF8&rewriteBatchedStatements=true&serverTimezone=PRC&useSSL=false&allowMultiQueries=true
           username: root
-          password: root123
+          password: hxxzuo527
           hikari:
             connection-timeout: 20000             # 是客户端等待连接池连接的最大毫秒数
             initialSize: 50                       # 连接池初始化连接数
@@ -74,13 +74,13 @@ sip:
 
 #zlm 默认服务器配置
 media:
-  id: zlmediakit-local
+  id: 流媒体处理服务器-dev
   # [必须修改] zlm服务器的内网IP
-  ip: 192.168.1.10
+  ip: 198.28.51.75
   # [必须修改] zlm服务器的http.port
-  http-port: 9092
+  http-port: 8780
   # [必选选] zlm服务器的hook.admin_params=secret
-  secret: TWSYFgYJOQWB4ftgeYut8DW4wbs7pQnj
+  secret: DxfRaE0q8ntmuEerzt68bk5QziK9NS2N
   # 启用多端口模式, 多端口模式使用端口区分每路流，兼容性更好。 单端口使用流的ssrc区分， 点播超时建议使用多端口测试
   rtp:
     # [可选] 是否启用多端口模式, 开启后会在portRange范围内选择端口用于媒体流传输

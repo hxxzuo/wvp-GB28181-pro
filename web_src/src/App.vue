@@ -57,6 +57,7 @@ body,
   margin: 0 0;
   background-color: #e9eef3;
   height: 100%;
+  width: 100%;
 }
 .el-header,
 .el-footer {

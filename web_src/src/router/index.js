@@ -79,7 +79,7 @@ export default new VueRouter({
           component: platform,
         },
         {
-          path: '/map/:deviceId/:parentChannelId/:count/:page',
+          path: '/map/:deviceId?/:parentChannelId?/:count?/:page?',
           name: 'map',
           component: map,
         },
@@ -89,12 +89,7 @@ export default new VueRouter({
           component: cloudRecord,
         },
         {
-          path: '/cloudRecordDetail/:app/:stream',
-          name: 'cloudRecordDetail',
-          component: cloudRecordDetail,
-        },
-        {
-          path: '/cloudRecordDetail/:mediaServerId/:app/:stream',
+          path: '/cloudRecordDetail/:mediaServerId?/:app/:stream',
           name: 'cloudRecordDetail',
           component: cloudRecordDetail,
         },
@@ -117,11 +112,6 @@ export default new VueRouter({
           path: '/setting/media',
           name: 'media',
           component: media,
-        },
-        {
-          path: '/map',
-          name: 'map',
-          component: map,
         },
         {
           path: '/userManager',

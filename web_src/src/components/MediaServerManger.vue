@@ -150,7 +150,7 @@
   }
   .card-img-zlm{
     width: 200px; height: 200px;
-    background: url('~@static/images/zlm-logo.png') no-repeat center;
+    background: url('~@static/images/server.png') no-repeat center;
     background-position: center;
     background-size: contain;
     margin: 0 auto;
