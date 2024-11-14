@@ -90,6 +90,8 @@ export default {
 
         }
 
+        this.onLineTileLayerSource.getSource().on('tileloaderror', this.handleTileLoadError);
+
         this.tileLayer = new Tile({
           source: this.onLineTileLayerSource? this.onLineTileLayerSource: this.offlineTileLayerSource,
         })
@@ -124,6 +126,10 @@ export default {
         }else {
           this.view.setMaxZoom(19)
         }
+      },
+      handleTileLoadError(event) {
+        console.log('在线地图加载失败，尝试切换到离线地图...');
+        this.switchSource('offlineMap')
       },
       setCenter(point){
 

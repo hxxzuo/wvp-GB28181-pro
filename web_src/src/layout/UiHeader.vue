@@ -20,7 +20,7 @@
         <el-menu-item index="/channel/region">行政区划</el-menu-item>
         <el-menu-item index="/channel/group">业务分组</el-menu-item>
       </el-submenu>
-      <el-menu-item index="">航标列表</el-menu-item>
+      <el-menu-item index="/atonList">航标列表</el-menu-item>
       <el-menu-item index="">巡视计划</el-menu-item>
       <el-menu-item index="">识别结果</el-menu-item>
       <el-submenu index="/setting">

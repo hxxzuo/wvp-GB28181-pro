@@ -132,8 +132,12 @@ export default new VueRouter({
           path: '/channel/group',
           name: 'group',
           component: group,
+        },
+        {
+          path: '/atonList',
+          name: 'aton',
+          component: aton,
         }
-        ,
         ]
     },
     {
