@@ -3,8 +3,12 @@ package com.genersoft.iot.vmp.web.gb28181;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.genersoft.iot.vmp.conf.exception.ControllerException;
+import com.genersoft.iot.vmp.gb28181.bean.Aton;
 import com.genersoft.iot.vmp.gb28181.bean.Device;
 import com.genersoft.iot.vmp.gb28181.bean.PresetQuerySipReq;
+import com.genersoft.iot.vmp.gb28181.controller.bean.AtonCameraListParam;
+import com.genersoft.iot.vmp.gb28181.controller.bean.AtonQueryParam;
+import com.genersoft.iot.vmp.gb28181.service.IAtonService;
 import com.genersoft.iot.vmp.gb28181.service.IDeviceChannelService;
 import com.genersoft.iot.vmp.gb28181.service.IDeviceService;
 import com.genersoft.iot.vmp.gb28181.transmit.callback.DeferredResultHolder;
@@ -17,10 +21,7 @@ import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.ObjectUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import javax.sip.InvalidArgumentException;
@@ -47,10 +48,12 @@ public class ApiDeviceController {
 
     @Autowired
     private IDeviceService deviceService;
-
+    @Autowired
+    private IAtonService atonService;
 
     /**
      * 分页获取设备列表 现在直接返回，尚未实现分页
+     *
      * @param start
      * @param limit
      * @param q
@@ -58,10 +61,10 @@ public class ApiDeviceController {
      * @return
      */
     @GetMapping(value = "/list")
-    public JSONObject list( @RequestParam(required = false)Integer start,
-                            @RequestParam(required = false)Integer limit,
-                            @RequestParam(required = false)String q,
-                            @RequestParam(required = false)Boolean online ){
+    public JSONObject list(@RequestParam(required = false) Integer start,
+                           @RequestParam(required = false) Integer limit,
+                           @RequestParam(required = false) String q,
+                           @RequestParam(required = false) Boolean online) {
 
 //        if (logger.isDebugEnabled()) {
 //            logger.debug("查询所有视频设备API调用");
@@ -69,11 +72,11 @@ public class ApiDeviceController {
 
         JSONObject result = new JSONObject();
         List<Device> devices;
-        if (start == null || limit ==null) {
+        if (start == null || limit == null) {
             devices = deviceService.getAllByStatus(online);
             result.put("DeviceCount", devices.size());
-        }else {
-            PageInfo<Device> deviceList = deviceService.getAll(start/limit, limit,null, online);
+        } else {
+            PageInfo<Device> deviceList = deviceService.getAll(start / limit, limit, null, online);
             result.put("DeviceCount", deviceList.getTotal());
             devices = deviceList.getList();
         }
@@ -99,19 +102,19 @@ public class ApiDeviceController {
             deviceJsonObject.put("CreatedAt", "");
             deviceJSONList.add(deviceJsonObject);
         });
-        result.put("DeviceList",deviceJSONList);
+        result.put("DeviceList", deviceJSONList);
         return result;
     }
 
     @GetMapping(value = "/channellist")
-    public JSONObject channellist( String serial,
-                                   @RequestParam(required = false)String channel_type,
-                                   @RequestParam(required = false)String code ,
-                                   @RequestParam(required = false)String dir_serial ,
-                                   @RequestParam(required = false)Integer start,
-                                   @RequestParam(required = false)Integer limit,
-                                   @RequestParam(required = false)String q,
-                                   @RequestParam(required = false)Boolean online ){
+    public JSONObject channellist(String serial,
+                                  @RequestParam(required = false) String channel_type,
+                                  @RequestParam(required = false) String code,
+                                  @RequestParam(required = false) String dir_serial,
+                                  @RequestParam(required = false) Integer start,
+                                  @RequestParam(required = false) Integer limit,
+                                  @RequestParam(required = false) String q,
+                                  @RequestParam(required = false) Boolean online) {
 
         JSONObject result = new JSONObject();
         List<DeviceChannelExtend> deviceChannels;
@@ -120,17 +123,17 @@ public class ApiDeviceController {
             String[] split = code.trim().split(",");
             channelIds = Arrays.asList(split);
         }
-        List<DeviceChannelExtend> allDeviceChannelList = channelService.queryChannelExtendsByDeviceId(serial,channelIds,online);
-        if (start == null || limit ==null) {
+        List<DeviceChannelExtend> allDeviceChannelList = channelService.queryChannelExtendsByDeviceId(serial, channelIds, online);
+        if (start == null || limit == null) {
             deviceChannels = allDeviceChannelList;
             result.put("ChannelCount", deviceChannels.size());
-        }else {
+        } else {
             if (start > allDeviceChannelList.size()) {
                 deviceChannels = new ArrayList<>();
-            }else {
+            } else {
                 if (start + limit < allDeviceChannelList.size()) {
                     deviceChannels = allDeviceChannelList.subList(start, start + limit);
-                }else {
+                } else {
                     deviceChannels = allDeviceChannelList.subList(start, allDeviceChannelList.size());
                 }
             }
@@ -177,19 +180,20 @@ public class ApiDeviceController {
 
     /**
      * 设备信息 - 获取下级通道预置位
-     * @param serial 设备编号
-     * @param code 通道编号,通过 /api/v1/device/channellist 获取的 ChannelList.ID, 该参数和 channel 二选一传递即可
+     *
+     * @param serial  设备编号
+     * @param code    通道编号,通过 /api/v1/device/channellist 获取的 ChannelList.ID, 该参数和 channel 二选一传递即可
      * @param channel 通道序号, 默认值: 1
-     * @param fill 是否填充空置预置位，当下级返回预置位，但不够255个时，自动填充空置预置位到255个， 默认值: true， 允许值: true, false
+     * @param fill    是否填充空置预置位，当下级返回预置位，但不够255个时，自动填充空置预置位到255个， 默认值: true， 允许值: true, false
      * @param timeout 超时时间(秒) 默认值: 15
      * @return
      */
     @GetMapping(value = "/fetchpreset")
-    private DeferredResult<Object>  list(String serial,
-                      @RequestParam(required = false)Integer channel,
-                      @RequestParam(required = false)String code,
-                      @RequestParam(required = false)Boolean fill,
-                      @RequestParam(required = false)Integer timeout){
+    private DeferredResult<Object> list(String serial,
+                                        @RequestParam(required = false) Integer channel,
+                                        @RequestParam(required = false) String code,
+                                        @RequestParam(required = false) Boolean fill,
+                                        @RequestParam(required = false) Integer timeout) {
 
         if (log.isDebugEnabled()) {
             log.debug("<模拟接口> 获取下级通道预置位 API调用，deviceId：{} ，channel：{} ，code：{} ，fill：{} ，timeout：{} ",
@@ -197,25 +201,25 @@ public class ApiDeviceController {
         }
 
         Device device = deviceService.getDeviceByDeviceId(serial);
-        String uuid =  UUID.randomUUID().toString();
-        String key =  DeferredResultHolder.CALLBACK_CMD_PRESETQUERY + (ObjectUtils.isEmpty(code) ? serial : code);
-        DeferredResult<Object> result = new DeferredResult<> (timeout * 1000L);
+        String uuid = UUID.randomUUID().toString();
+        String key = DeferredResultHolder.CALLBACK_CMD_PRESETQUERY + (ObjectUtils.isEmpty(code) ? serial : code);
+        DeferredResult<Object> result = new DeferredResult<>(timeout * 1000L);
         DeferredResultEx<Object> deferredResultEx = new DeferredResultEx<>(result);
-        result.onTimeout(()->{
+        result.onTimeout(() -> {
             log.warn("<模拟接口> 获取设备预置位超时");
             // 释放rtpserver
             RequestMessage msg = new RequestMessage();
             msg.setId(uuid);
             msg.setKey(key);
-            msg.setData("wait for presetquery timeout["+timeout+"s]");
+            msg.setData("wait for presetquery timeout[" + timeout + "s]");
             resultHolder.invokeResult(msg);
         });
         if (resultHolder.exist(key, null)) {
             return result;
         }
 
-        deferredResultEx.setFilter(filterResult->{
-            List<PresetQuerySipReq> presetQuerySipReqList = (List<PresetQuerySipReq>)filterResult;
+        deferredResultEx.setFilter(filterResult -> {
+            List<PresetQuerySipReq> presetQuerySipReqList = (List<PresetQuerySipReq>) filterResult;
             HashMap<String, Object> resultMap = new HashMap<>();
             resultMap.put("DeviceID", code);
             resultMap.put("Result", "OK");
@@ -228,7 +232,7 @@ public class ApiDeviceController {
                 item.put("PresetEnable", true);
                 presetItemList.add(item);
             }
-            resultMap.put("PresetItemList",presetItemList );
+            resultMap.put("PresetItemList", presetItemList);
             return resultMap;
         });
 
@@ -247,5 +251,17 @@ public class ApiDeviceController {
             throw new ControllerException(ErrorCode.ERROR100.getCode(), "命令发送失败: " + e.getMessage());
         }
         return result;
+    }
+
+    @PostMapping(value = "/atonlist")
+    public PageInfo atonlist(@RequestBody AtonQueryParam param) {
+        PageInfo<Aton> atons = atonService.queryAton(param.getPage(), param.getCount(), param.getName(), param.getType());
+        return atons;
+    }
+
+    @PostMapping(value = "/checkatoncameralist")
+    public PageInfo checkAtonCameraList(@RequestBody AtonCameraListParam param) {
+        PageInfo<Aton> atons = atonService.queryAton(param.getName(), param.getRadius());
+        return atons;
     }
 }

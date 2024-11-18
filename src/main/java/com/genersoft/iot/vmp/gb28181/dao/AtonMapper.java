@@ -24,12 +24,11 @@ public interface AtonMapper {
             "administer," +
             "maintenance," +
             "belong," +
-            "waters," +
-            "(SELECT count(0) FROM aton as count " +
+            "waters" +
             " FROM aton de" +
             " where 1 = 1 " +
-            " <if test='query != null'> AND de.name=${aton.name} AND de.type=${aton.type} AND de.maintenance=${aton.maintenance} " +
-            "AND de.belong=${aton.belong} AND de.waters=${aton.waters} </if> " +
+            " <if test='name != null'> AND de.name='${name}' </if> " +
+            " <if test='type != null'> AND de.type='${type}' </if> " +
             " </script>")
-    List<Aton> queryAtonList(@Param("aton") Aton aton);
+    List<Aton> queryAtonList(@Param("name") String name,@Param("type") String type);
 }

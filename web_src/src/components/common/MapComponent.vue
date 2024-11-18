@@ -90,7 +90,7 @@ export default {
 
         }
 
-        this.onLineTileLayerSource.getSource().on('tileloaderror', this.handleTileLoadError);
+        // this.onLineTileLayerSource.getSource().on('tileloaderror', this.handleTileLoadError);
 
         this.tileLayer = new Tile({
           source: this.onLineTileLayerSource? this.onLineTileLayerSource: this.offlineTileLayerSource,

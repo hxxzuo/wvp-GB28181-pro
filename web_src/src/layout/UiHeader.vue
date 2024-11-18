@@ -1,8 +1,8 @@
 <template>
   <div id="UiHeader">
-    <el-menu router :default-active="activeIndex" menu-trigger="click" background-color="#001529" text-color="#fff"
-             active-text-color="#1890ff" mode="horizontal">
-      <el-menu-item style="font-size: 23px;" @click="() => {}">航标可视化系统</el-menu-item>
+    <el-menu router :default-active="activeIndex" menu-trigger="hover" background-color="#001529" text-color="#fff"
+             active-text-color="#1890ff" mode="horizontal" :unique-opened="true">
+      <el-menu-item style="font-size: 21px;" @click="() => {}">航标可视化系统</el-menu-item>
       <el-menu-item index="/console">控制台</el-menu-item>
       <el-menu-item index="/live">分屏监控</el-menu-item>
       <el-menu-item index="/map">电子地图</el-menu-item>
@@ -29,17 +29,9 @@
         <el-menu-item index="/setting/web">WEB服务</el-menu-item>
         <el-menu-item index="/setting/sip">国标服务</el-menu-item>
         <el-menu-item index="/setting/media">媒体服务</el-menu-item>
+        <el-menu-item index="/operations">运维中心</el-menu-item>
       </el-submenu>
-      <el-menu-item style="float: right;" @click="loginout">退出</el-menu-item>
-      <el-menu-item index="/operations">运维中心</el-menu-item>
 
-      <!--            <el-submenu index="/setting">-->
-      <!--              <template slot="title">系统设置</template>-->
-      <!--              <el-menu-item index="/setting/web">WEB服务</el-menu-item>-->
-      <!--              <el-menu-item index="/setting/sip">国标服务</el-menu-item>-->
-      <!--              <el-menu-item index="/setting/media">媒体服务</el-menu-item>-->
-      <!--            </el-submenu>-->
-      <!--            <el-menu-item style="float: right;" @click="loginout">退出</el-menu-item>-->
       <el-submenu index="" style="float: right;">
         <template slot="title">欢迎，{{ username }}</template>
         <el-menu-item @click="openDoc">在线文档</el-menu-item>
@@ -204,6 +196,7 @@ export default {
 #UiHeader .el-menu-item.is-active {
   color: #fff !important;
   background-color: #1890ff !important;
+  font-size: 12px;
 }
 #UiHeader .el-submenu.is-active {
   background-color: #1890ff !important;

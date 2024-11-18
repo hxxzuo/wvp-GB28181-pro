@@ -43,8 +43,8 @@ export default {
       isLoging: false,
       showPassword: false,
       loginLoading: false,
-  		username: '',
-  		password: ''
+  		username: 'admin',
+  		password: 'admin'
   	}
   },
   created(){

@@ -2,14 +2,10 @@ package com.genersoft.iot.vmp.web.gb28181;
 
 import com.alibaba.fastjson2.JSONObject;
 import com.genersoft.iot.vmp.conf.SipConfig;
-import com.genersoft.iot.vmp.gb28181.bean.Aton;
-import com.genersoft.iot.vmp.gb28181.service.IAtonService;
-import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -23,8 +19,6 @@ public class ApiController {
 
     @Autowired
     private SipConfig sipConfig;
-    @Autowired
-    private IAtonService atonService;
 
     @GetMapping("/getserverinfo")
     private JSONObject getserverinfo() {
@@ -108,10 +102,4 @@ public class ApiController {
         return result;
     }
 
-    @PostMapping(value = "/atonlist")
-    public PageInfo atonlist(Integer start, Integer limit, Aton aton) {
-
-        PageInfo<Aton> atons = atonService.queryAton(start, limit, aton);
-        return atons;
-    }
 }

@@ -5,13 +5,11 @@ import com.genersoft.iot.vmp.gb28181.bean.DeviceChannel;
 import com.genersoft.iot.vmp.gb28181.controller.bean.ChannelReduce;
 import com.genersoft.iot.vmp.gb28181.dao.provider.DeviceChannelProvider;
 import com.genersoft.iot.vmp.service.bean.GPSMsgInfo;
-import com.genersoft.iot.vmp.streamPush.bean.StreamPush;
 import com.genersoft.iot.vmp.web.gb28181.dto.DeviceChannelExtend;
 import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 用于存储设备通道信息
@@ -655,4 +653,20 @@ public interface DeviceChannelMapper {
             " where device_db_id=#{deviceDbId} and device_id = #{channelId}" +
             " </script>"})
     DeviceChannel getOneBySourceChannelId(int deviceDbId, String channelId);
+
+    @Select(value = {" <script>" +
+            " SELECT " +
+            " id,\n" +
+            " device_db_id,\n" +
+            " stream_id,\n" +
+            " device_id,\n" +
+            " name,\n" +
+            " status,\n" +
+            " longitude,\n" +
+            " latitude,\n" +
+            " ptz_type,\n" +
+            " position_type,\n" +
+            " from wvp_device_channel " +
+            " </script>"})
+    DeviceChannel getAllDeviceLocation();
 }
