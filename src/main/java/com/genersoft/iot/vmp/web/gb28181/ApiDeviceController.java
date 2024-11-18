@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.genersoft.iot.vmp.conf.exception.ControllerException;
 import com.genersoft.iot.vmp.gb28181.bean.Aton;
 import com.genersoft.iot.vmp.gb28181.bean.Device;
+import com.genersoft.iot.vmp.gb28181.bean.DeviceChannel;
 import com.genersoft.iot.vmp.gb28181.bean.PresetQuerySipReq;
 import com.genersoft.iot.vmp.gb28181.controller.bean.AtonCameraListParam;
 import com.genersoft.iot.vmp.gb28181.controller.bean.AtonQueryParam;
@@ -261,7 +262,7 @@ public class ApiDeviceController {
 
     @PostMapping(value = "/checkatoncameralist")
     public PageInfo checkAtonCameraList(@RequestBody AtonCameraListParam param) {
-        PageInfo<Aton> atons = atonService.queryAton(param.getName(), param.getRadius());
+        PageInfo<DeviceChannel> atons = atonService.checkAtonCameraList(1, 10, param.getName(), param.getRadius());
         return atons;
     }
 }

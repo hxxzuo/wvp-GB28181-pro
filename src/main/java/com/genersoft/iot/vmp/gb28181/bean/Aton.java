@@ -7,8 +7,8 @@ public class Aton {
 
     private Long id;
     private String name;
-    private String longitude;
-    private String latitude;
+    private Double longitude;
+    private Double latitude;
     private String type;
     private String address;
     private String attribute;

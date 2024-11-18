@@ -664,9 +664,8 @@ public interface DeviceChannelMapper {
             " status,\n" +
             " longitude,\n" +
             " latitude,\n" +
-            " ptz_type,\n" +
-            " position_type,\n" +
+            " ptz_type\n" +
             " from wvp_device_channel " +
             " </script>"})
-    DeviceChannel getAllDeviceLocation();
+    List<DeviceChannel> getAllDeviceLocation();
 }

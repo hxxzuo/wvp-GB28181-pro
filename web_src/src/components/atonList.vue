@@ -40,7 +40,7 @@
     </div>
     <el-container v-loading="isLoging" style="height: 82vh;">
       <el-main style="padding: 5px;">
-        <el-table size="medium" ref="channelListTable" :data="deviceChannelList" :height="winHeight" style="width: 100%"
+        <el-table size="medium" ref="channelListTable" :data="atonList" :height="winHeight" style="width: 100%"
                   header-row-class-name="table-header">
           <el-table-column prop="name" label="名称" min-width="100">
           </el-table-column>
@@ -51,7 +51,9 @@
           <el-table-column label="经纬度" min-width="100">
             <template slot-scope="scope">
               <span size="medium"
-                    v-if="scope.row.longitude && scope.row.latitude">{{ scope.row.longitude }}<br/>{{ scope.row.latitude }}</span>
+                    v-if="scope.row.longitude && scope.row.latitude">{{ scope.row.longitude }}<br/>{{
+                  scope.row.latitude
+                }}</span>
               <span size="medium" v-if="!scope.row.longitude || !scope.row.latitude">无</span>
             </template>
           </el-table-column>
@@ -65,12 +67,31 @@
           </el-table-column>
           <el-table-column prop="waters" label="水域" min-width="100">
           </el-table-column>
-          <el-table-column label="操作" min-width="340" fixed="right">
+          <el-table-column label="操作" min-width="240" fixed="right">
             <template slot-scope="scope">
+              <!-- 分隔线 -->
               <el-divider direction="vertical"></el-divider>
-              <el-button size="medium" icon="el-icon-s-open" type="text"
-                         @click="changeSubchannel(scope.row)">查询航标附近摄像头
-              </el-button>
+              <!-- 按钮触发 -->
+              <el-popover
+                ref="popover"
+                placement="top"
+                width="300"
+                trigger="click"
+                v-if="popoverVisible && currentRow === scope.row">
+                <div v-for="(item, index) in checkResultList" :key="index">
+                  <p>{{ item.name }}: {{ item.value }}</p>
+                </div>
+              </el-popover>
+              <div slot="reference">
+                <el-button
+                  size="medium"
+                  icon="el-icon-s-open"
+                  type="text"
+                  @click="handleButtonClick(scope.row)"
+                >
+                  查询航标附近摄像头
+                </el-button>
+              </div>
             </template>
           </el-table-column>
         </el-table>
@@ -108,7 +129,10 @@ export default {
   data() {
     return {
       deviceService: new DeviceService(),
-      deviceChannelList: [],
+      atonList: [],
+      checkResultList: [],
+      popoverVisible: false, // 弹框是否显示
+      currentRow: null, // 当前操作的行
       updateLooper: 0, //数据刷新轮训标志
       searchSrt: null,
       type: null,
@@ -116,6 +140,7 @@ export default {
       currentPage: 1,
       count: 15,
       total: 0,
+      checkRadius: 500,
       isLoging: false,
       showTree: false,
       loadSnap: {},
@@ -167,7 +192,7 @@ export default {
         console.log(res)
         if (res.status === 200) {
           that.total = res.data.total;
-          that.deviceChannelList = res.data.list;
+          that.atonList = res.data.list;
           that.$nextTick(() => {
             that.$refs.channelListTable.doLayout();
           })
@@ -190,6 +215,34 @@ export default {
       this.initParam();
       this.initData();
     },
+    async handleButtonClick(row) {
+      // 记录当前行
+      this.currentRow = row;
+      // 调用方法获取 atonList 数据
+      await this.checkAtonCameraList(row);
+      // 显示弹框
+      this.popoverVisible = true;
+    },
+    checkAtonCameraList: function (row) {
+      let that = this;
+      this.$axios({
+        method: 'post',
+        url: `/api/v1/device/checkatoncameralist`,
+        data: {
+          name: row.name,
+          radius: that.checkRadius
+        }
+      }).then(function (res) {
+        console.log(res)
+        if (res.status === 200) {
+          that.total = res.data.total;
+          that.checkResultList = res.data.list;
+        }
+      }).catch(function (error) {
+        console.log(error);
+      });
+
+    }
   }
 };
 </script>
