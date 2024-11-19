@@ -50,11 +50,22 @@ public class AtonServiceImpl implements IAtonService {
             return new PageInfo<>(deviceChannels);
         }
         deviceChannels = deviceChannels.stream().filter(deviceChannel -> {
-            if (radius != null) {
-                return GpsUtil.calculateDistance(aton.getLongitude(), aton.getLatitude(), deviceChannel.getLongitude(), deviceChannel.getLatitude()) <= radius;
-            }
-            return true;
+            double distance = GpsUtil.calculateDistance(aton.getLongitude(), aton.getLatitude(), deviceChannel.getLongitude(), deviceChannel.getLatitude());
+            if (distance <= radius) {
+                deviceChannel.setToAtonDistance((int) distance);
+                deviceChannel.setRelativeAtonDirection(GpsUtil.calculateRelativeDirection(deviceChannel.getLongitude(), deviceChannel.getLatitude(), aton.getLongitude(), aton.getLatitude()));
+                return true;
+            } else return false;
         }).collect(Collectors.toList());
+        return new PageInfo<>(deviceChannels);
+    }
+
+    public PageInfo<DeviceChannel> getAllDeviceChannel() {
+        PageHelper.startPage(1, 1000);
+        List<DeviceChannel> deviceChannels = deviceChannelMapper.getAllDeviceLocation();
+        if (CollectionUtils.isEmpty(deviceChannels)) {
+            return new PageInfo<>();
+        }
         return new PageInfo<>(deviceChannels);
     }
 }

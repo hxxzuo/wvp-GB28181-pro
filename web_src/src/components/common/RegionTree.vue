@@ -4,15 +4,16 @@
       <div class="page-title">行政区划</div>
       <div class="page-header-btn">
         <div style="display: inline;">
-          <el-input @input="search" style="visibility:hidden; margin-right: 1rem; width: 12rem;" size="mini" placeholder="关键字"
+          <el-input @input="search" style="visibility:hidden; margin-right: 1rem; width: 12rem;" size="mini"
+                    placeholder="关键字"
                     prefix-icon="el-icon-search" v-model="searchSrt" clearable></el-input>
 
           <el-checkbox v-model="showCode">显示编号</el-checkbox>
         </div>
       </div>
     </div>
-    <div v-if="showHeader" style="height: 2rem; background-color: #FFFFFF" ></div>
-    <div >
+    <div v-if="showHeader" style="height: 2rem; background-color: #FFFFFF"></div>
+    <div>
       <vue-easy-tree
         class="flow-tree"
         ref="veTree"
@@ -28,20 +29,26 @@
         @node-click="nodeClickHandler"
       >
         <template class="custom-tree-node" v-slot:default="{ node, data }">
-        <span class="custom-tree-node" >
-          <span v-if="node.data.type === 0 && chooseId !== node.data.deviceId" style="color: #409EFF" class="iconfont icon-bianzubeifen3"></span>
-          <span v-if="node.data.type === 0 && chooseId === node.data.deviceId" style="color: #c60135;" class="iconfont icon-bianzubeifen3"></span>
-          <span v-if="node.data.type === 1 && node.data.status === 'ON'" style="color: #409EFF" class="iconfont icon-shexiangtou2"></span>
-          <span v-if="node.data.type === 1 && node.data.status !== 'ON'" style="color: #808181" class="iconfont icon-shexiangtou2"></span>
-          <span style=" padding-left: 1px" v-if="node.data.deviceId !=='' && showCode" :title="node.data.deviceId">{{ node.label }}（编号：{{ node.data.deviceId }}）</span>
-          <span style=" padding-left: 1px" v-if="node.data.deviceId ==='' || !showCode" :title="node.data.deviceId">{{ node.label }}</span>
+        <span class="custom-tree-node">
+          <span v-if="node.data.type === 0 && chooseId !== node.data.deviceId" style="color: #409EFF"
+                class="iconfont icon-bianzubeifen3"></span>
+          <span v-if="node.data.type === 0 && chooseId === node.data.deviceId" style="color: #c60135;"
+                class="iconfont icon-bianzubeifen3"></span>
+          <span v-if="node.data.type === 1 && node.data.status === 'ON'" style="color: #409EFF"
+                class="iconfont icon-shexiangtou2"></span>
+          <span v-if="node.data.type === 1 && node.data.status !== 'ON'" style="color: #808181"
+                class="iconfont icon-shexiangtou2"></span>
+          <span style=" padding-left: 1px" v-if="node.data.deviceId !=='' && showCode"
+                :title="node.data.deviceId">{{ node.label }}（编号：{{ node.data.deviceId }}）</span>
+          <span style=" padding-left: 1px" v-if="node.data.deviceId ==='' || !showCode"
+                :title="node.data.deviceId">{{ node.label }}</span>
         </span>
         </template>
       </vue-easy-tree>
     </div>
     <regionEdit ref="regionEdit"></regionEdit>
     <gbDeviceSelect ref="gbDeviceSelect"></gbDeviceSelect>
-    <GbChannelSelect ref="gbChannelSelect" dataType="civilCode" ></GbChannelSelect>
+    <GbChannelSelect ref="gbChannelSelect" dataType="civilCode"></GbChannelSelect>
   </div>
 </template>
 
@@ -220,11 +227,11 @@ export default {
           node.parent.expand();
         }
       }).catch(function (error) {
-          console.log(error);
+        console.log(error);
       });
     },
     addChannelFormDevice: function (id, node) {
-      this.$refs.gbDeviceSelect.openDialog((rows)=>{
+      this.$refs.gbDeviceSelect.openDialog((rows) => {
         let deviceIds = []
         for (let i = 0; i < rows.length; i++) {
           deviceIds.push(rows[i].id)
@@ -236,25 +243,25 @@ export default {
             civilCode: node.data.deviceId,
             deviceIds: deviceIds,
           }
-        }).then((res)=> {
+        }).then((res) => {
           if (res.data.code === 0) {
             this.$message.success({
-            showClose: true,
-            message: "保存成功"
-          })
+              showClose: true,
+              message: "保存成功"
+            })
             if (this.onChannelChange) {
               this.onChannelChange()
             }
             node.loaded = false
             node.expand();
-          }else {
+          } else {
             this.$message.error({
               showClose: true,
               message: res.data.msg
             })
           }
           this.loading = false
-        }).catch((error)=> {
+        }).catch((error) => {
           this.$message.error({
             showClose: true,
             message: error
@@ -264,7 +271,7 @@ export default {
       })
     },
     removeChannelFormDevice: function (id, node) {
-      this.$refs.gbDeviceSelect.openDialog((rows)=>{
+      this.$refs.gbDeviceSelect.openDialog((rows) => {
         let deviceIds = []
         for (let i = 0; i < rows.length; i++) {
           deviceIds.push(rows[i].id)
@@ -275,7 +282,7 @@ export default {
           data: {
             deviceIds: deviceIds,
           }
-        }).then((res)=> {
+        }).then((res) => {
           if (res.data.code === 0) {
             this.$message.success({
               showClose: true,
@@ -286,14 +293,14 @@ export default {
             }
             node.loaded = false
             node.expand();
-          }else {
+          } else {
             this.$message.error({
               showClose: true,
               message: res.data.msg
             })
           }
           this.loading = false
-        }).catch((error)=> {
+        }).catch((error) => {
           this.$message.error({
             showClose: true,
             message: error
@@ -336,7 +343,7 @@ export default {
         parentDeviceId: node.data.deviceId,
       });
     },
-    editCatalog: function (data, node){
+    editCatalog: function (data, node) {
       // 打开添加弹窗
       this.$refs.regionEdit.openDialog(form => {
         node.loaded = false
@@ -374,6 +381,7 @@ export default {
 .device-offline {
   color: #727272;
 }
+
 .custom-tree-node .el-radio__label {
   padding-left: 4px !important;
 }

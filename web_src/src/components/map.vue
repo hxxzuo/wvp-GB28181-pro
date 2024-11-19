@@ -5,7 +5,8 @@
         <DeviceTree ref="deviceTree" :clickEvent="clickEvent" :contextMenuEvent="contextmenuEventHandler"></DeviceTree>
       </el-aside>
       <el-main style="height: 91vh; padding: 0">
-        <MapComponent ref="map"></MapComponent>
+        <MapComponent ref="map" @showAllCameraLocation-event="showAllCameraLocation"
+                      @showAllAtonLocation-event="showAllAtonLocation"></MapComponent>
       </el-main>
     </el-container>
     <div v-if="!onOff" style="width: 100%; height:100%; text-align: center; line-height: 5rem">
@@ -17,12 +18,18 @@
                          :labelStyle="labelStyle">
           <el-descriptions-item label="平台编号">{{ channel["gbParentId"] }}</el-descriptions-item>
           <el-descriptions-item label="通道编号">{{ channel["gbDeviceId"] }}</el-descriptions-item>
-          <el-descriptions-item label="型号">{{ channel["gbModel"]}}</el-descriptions-item>
-          <el-descriptions-item label="经纬度">{{ channel["gbLongitude"] }},{{ channel["gbLatitude"] }}</el-descriptions-item>
+          <el-descriptions-item label="型号">{{ channel["gbModel"] }}</el-descriptions-item>
+          <el-descriptions-item label="经纬度">{{ channel["gbLongitude"] }},{{
+              channel["gbLatitude"]
+            }}
+          </el-descriptions-item>
           <el-descriptions-item label="生产厂商">{{ channel["gbManufacturer"] }}</el-descriptions-item>
           <el-descriptions-item label="安装地址">{{ channel["gbAddress"] }}</el-descriptions-item>
-          <el-descriptions-item label="网络地址">{{ channel["gbIpAddress"]+":"+channel["gbPort"] }}</el-descriptions-item>
-<!--          <el-descriptions-item label="安装地址">{{ channel.address == null ? '未知' : channel.address }}</el-descriptions-item>-->
+          <el-descriptions-item label="网络地址">{{
+              channel["gbIpAddress"] + ":" + channel["gbPort"]
+            }}
+          </el-descriptions-item>
+          <!--          <el-descriptions-item label="安装地址">{{ channel.address == null ? '未知' : channel.address }}</el-descriptions-item>-->
           <el-descriptions-item label="云台类型">{{ ptzTypeMapping[channel["gbPtzType"]] }}</el-descriptions-item>
           <el-descriptions-item label="通道状态">
             <el-tag size="small" v-if="channel['gbStatus'] === 'ON'">在线</el-tag>
@@ -31,13 +38,30 @@
         </el-descriptions>
         <div style="padding-top: 10px">
           <el-button v-bind:disabled="channel['gbStatus'] !== 'ON'" type="primary" size="small" title="播放"
-                     icon="el-icon-video-play" @click="play(channel)"></el-button>
-<!--          <el-button type="primary" size="small" title="编辑位置" icon="el-icon-edit"-->
-<!--                     @click="edit(channel)"></el-button>-->
-<!--          <el-button type="primary" size="small" title="轨迹查询" icon="el-icon-map-location"-->
-<!--                     @click="getTrace(channel)"></el-button>-->
+                     icon="el-icon-video-play" @click="play(channel)">播放
+          </el-button>
+          <!--          <el-button type="primary" size="small" title="编辑位置" icon="el-icon-edit"-->
+          <!--                     @click="edit(channel)"></el-button>-->
+          <!--          <el-button type="primary" size="small" title="轨迹查询" icon="el-icon-map-location"-->
+          <!--                     @click="getTrace(channel)"></el-button>-->
         </div>
         <span class="infobox-close el-icon-close" @click="closeInfoBox()"></span>
+      </div>
+    </div>
+    <div ref="atoninfobox" v-if="aton != null ">
+      <div v-if="aton != null" class="infobox-content">
+        <el-descriptions class="margin-top" :title="aton.name" :column="1" :colon="true" size="mini"
+                         :labelStyle="labelStyle">
+          <el-descriptions-item label="地址">{{ aton["address"] }}</el-descriptions-item>
+          <el-descriptions-item label="类型">{{ aton["type"] }}</el-descriptions-item>
+          <el-descriptions-item label="航标性质">{{ aton["attribute"] }}</el-descriptions-item>
+          <el-descriptions-item label="经纬度">{{ aton["longitude"] }},{{ aton["latitude"] }}</el-descriptions-item>
+          <el-descriptions-item label="管辖单位">{{ aton["administer"] }}</el-descriptions-item>
+          <el-descriptions-item label="维护单位">{{ aton["maintenance"] }}</el-descriptions-item>
+          <el-descriptions-item label="所属单位">{{ [aton["belong"]] }}</el-descriptions-item>
+          <el-descriptions-item label="水域">{{ [aton["waters"]] }}</el-descriptions-item>
+        </el-descriptions>
+        <span class="infobox-close el-icon-close" @click="closeAtonInfoBox()"></span>
       </div>
     </div>
     <devicePlayer ref="devicePlayer"></devicePlayer>
@@ -52,6 +76,7 @@ import DeviceTree from "./common/DeviceTree";
 import channelMapInfobox from "./dialog/channelMapInfobox";
 import devicePlayer from './dialog/devicePlayer.vue'
 import queryTrace from './dialog/queryTrace.vue'
+import {createEmpty, extend} from "ol/extent";
 
 export default {
   name: "map",
@@ -70,15 +95,17 @@ export default {
       layer: null,
       lineLayer: null,
       channel: null,
+      aton: null,
       device: null,
       infoBoxId: null,
+      atonInfoBoxId: null,
       labelStyle: {
         width: "52px"
       },
 
       isLoging: false,
-      longitudeStr: "longitude",
-      latitudeStr: "latitude",
+      longitudeStr: "gbLongitude",
+      latitudeStr: "gbLatitude",
 
       ptzTypeMapping: {
         1: '球机',
@@ -100,7 +127,7 @@ export default {
         this.deviceService.getAllChannel(false, false, this.$route.query.deviceId, this.channelsHandler)
       }, 1000)
     }
-    console.log("window.mapParam "+ window.mapParam.coordinateSystem)
+    console.log("window.mapParam " + window.mapParam.coordinateSystem)
     if (window.mapParam.coordinateSystem == "GCJ-02") {
       this.longitudeStr = "longitudeGcj02";
       this.latitudeStr = "latitudeGcj02";
@@ -126,8 +153,6 @@ export default {
       }).then((res) => {
         if (res.data.code === 0) {
           console.log(res.data.data)
-          console.log(res.data.data.gbLongitude)
-          console.log(res.data.data.gbLatitude)
           console.log("119")
           if (!res.data.data.gbLongitude || !res.data.data.gbLatitude) {
             this.$message.error({
@@ -155,9 +180,75 @@ export default {
         console.log(error);
       });
     },
+    showAllCameraLocation: function () {
+      this.$axios({
+        method: 'get',
+        url: `/api/device/query/devices/allChannel`,
+        params: {}
+      }).then((res) => {
+        if (res.data.code === 0) {
+          console.log("172")
+          if (this.layer != null) {
+            this.$refs.map.removeLayer(this.layer);
+          }
+          this.closeInfoBox()
+          const channels = res.data.data.list;
+          const layerData = channels.map((channel) => ({
+            position: [channel.gbLongitude, channel.gbLatitude],
+            image: {
+              src: this.getImageByChannel(channel),
+              anchor: [0.5, 1],
+            },
+            data: channel, // 保存当前元素信息
+          }));
+
+          // 添加所有元素图层
+          this.layer = this.$refs.map.addLayer(layerData, this.featureClickEvent);
+
+          // const extent = createEmpty(); // 初始化空边界
+          // channels.forEach((channel) => {
+          //   const coord = [channel.gbLongitude, channel.gbLatitude]; // OpenLayers 使用 [lon, lat]
+          //   extend(extent, coord); // 扩展边界范围
+          // });
+          // this.$refs.map.getView().fit(extent, { padding: [50, 50] });
+        }
+      }).catch(function (error) {
+        console.log(error);
+      });
+    },
+    showAllAtonLocation: function () {
+      this.$axios({
+        method: 'post',
+        url: `/api/v1/device/atonlist`,
+        data: {
+          page: 1,
+          count: 1500,
+        }
+      }).then((res) => {
+        console.log(res)
+        if (res.status === 200) {
+          if (this.layer != null) {
+            this.$refs.map.removeLayer(this.layer);
+          }
+          this.closeInfoBox()
+          const atons = res.data.list;
+          const layerData = atons.map((aton) => ({
+            position: [aton.longitude, aton.latitude],
+            image: {
+              src: this.getImageByAton(aton),
+              anchor: [0.5, 1],
+            },
+            data: aton, // 保存当前元素信息
+          }));
+
+          this.layer = this.$refs.map.addLayer(layerData, this.atonFeatureClickEvent);
+        }
+      }).catch(function (error) {
+        console.log(error);
+      });
+    },
     contextmenuEventHandler: function (device, event, data, isCatalog) {
       console.log(device)
-      console.log(device.online)
       console.log("149")
       this.device = device;
       if (data.channelId && !isCatalog) {
@@ -245,7 +336,6 @@ export default {
         this.closeInfoBox()
         let params = [];
 
-
         for (let i = 0; i < channels.length; i++) {
           let longitude = channels[i][this.longitudeStr];
           let latitude = channels[i][this.latitudeStr];
@@ -316,16 +406,43 @@ export default {
       }
       return src;
     },
+    getImageByAton: function (aton) {
+      let src = "static/images/gis/camera.png"
+      switch (aton.type) {
+        case 1:
+            src = "static/images/gis/camera1-offline.png"
+          break;
+        case 2:
+            src = "static/images/gis/camera2-offline.png"
+          break;
+        case 3:
+            src = "static/images/gis/camera3-offline.png"
+          break;
+        default:
+            src = "static/images/aton/1.ico"
+      }
+      return src;
+    },
     featureClickEvent: function (channels) {
-
       this.closeInfoBox()
       if (channels.length > 0) {
         this.channel = channels[0]
       }
-      console.log("featureClickEvent:"+this.channel)
+      console.log("featureClickEvent:" + JSON.stringify(this.channel))
       this.$nextTick(() => {
         let position = [this.channel[this.longitudeStr], this.channel[this.latitudeStr]];
         this.infoBoxId = this.$refs.map.openInfoBox(position, this.$refs.infobox, [0, -50])
+      })
+    },
+    atonFeatureClickEvent: function (atons) {
+      this.closeInfoBox()
+      if (atons.length > 0) {
+        this.aton = atons[0]
+      }
+      console.log("atonFeatureClickEvent:" + JSON.stringify(this.aton))
+      this.$nextTick(() => {
+        let position = [this.aton['longitude'], this.aton['latitude']];
+        this.atonInfoBoxId = this.$refs.map.openInfoBox(position, this.$refs.atoninfobox, [0, -50])
       })
     },
     closeInfoBox: function () {
@@ -333,8 +450,13 @@ export default {
         this.$refs.map.closeInfoBox(this.infoBoxId)
       }
     },
+    closeAtonInfoBox: function () {
+      if (this.atonInfoBoxId != null) {
+        this.$refs.map.closeInfoBox(this.atonInfoBoxId)
+      }
+    },
     play: function (channel) {
-      console.info("play: "+ JSON.stringify(channel))
+      console.info("play: " + JSON.stringify(channel))
       let deviceId = channel.gbParentId;
       this.isLoging = true;
       let channelId = channel.gbDeviceId;

@@ -3,7 +3,7 @@
     <div class="page-header">
       <div class="page-title">
         <el-button icon="el-icon-back" size="mini" style="font-size: 20px; color: #000;" type="text"
-                   @click="showDevice"></el-button>
+                   @click="showAton"></el-button>
         <el-divider direction="vertical"></el-divider>
         航标列表
       </div>
@@ -69,29 +69,46 @@
           </el-table-column>
           <el-table-column label="操作" min-width="240" fixed="right">
             <template slot-scope="scope">
-              <!-- 分隔线 -->
               <el-divider direction="vertical"></el-divider>
-              <!-- 按钮触发 -->
+              <!-- 将按钮作为 popover 的触发元素 -->
               <el-popover
                 ref="popover"
-                placement="top"
-                width="300"
+                placement="right"
+                width="700"
                 trigger="click"
-                v-if="popoverVisible && currentRow === scope.row">
-                <div v-for="(item, index) in checkResultList" :key="index">
-                  <p>{{ item.name }}: {{ item.value }}</p>
+              >
+                <div v-if="popoverContent">
+                  <el-table :data="popoverContent" style="max-width: 700px; max-height: 400px; overflow: auto;">
+                    <el-table-column prop="name" label="名称" width="300px"></el-table-column>
+                    <el-table-column prop="ptzTypeText" label="类型" show-overflow-tooltip></el-table-column>
+                    <el-table-column prop="toAtonDistance" label="距离(米)" show-overflow-tooltip></el-table-column>
+                    <el-table-column prop="relativeAtonDirection" label="相对航标方位"
+                                     show-overflow-tooltip></el-table-column>
+                    <el-table-column label="操作" show-overflow-tooltip>
+                      <template slot-scope="scope">
+                        <el-button type="text" @click="play(scope.row)">播放</el-button>
+                      </template>
+                    </el-table-column>
+                  </el-table>
                 </div>
-              </el-popover>
-              <div slot="reference">
                 <el-button
+                  slot="reference"
                   size="medium"
                   icon="el-icon-s-open"
                   type="text"
-                  @click="handleButtonClick(scope.row)"
+                  @click="checkAtonCameraList(scope.row)"
                 >
-                  查询航标附近摄像头
+                  查询附近摄像头
                 </el-button>
-              </div>
+              </el-popover>
+              <el-button
+                size="medium"
+                icon="el-icon-s-open"
+                type="text"
+                @click="locate(scope.row)"
+              >
+                地图定位
+              </el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -107,7 +124,7 @@
         </el-pagination>
       </el-main>
     </el-container>
-
+    <devicePlayer ref="devicePlayer"></devicePlayer>
   </div>
 </template>
 
@@ -128,11 +145,10 @@ export default {
   },
   data() {
     return {
+      popoverContent: null, // 存储弹出框内容
+      cameraTotal: 0,
       deviceService: new DeviceService(),
       atonList: [],
-      checkResultList: [],
-      popoverVisible: false, // 弹框是否显示
-      currentRow: null, // 当前操作的行
       updateLooper: 0, //数据刷新轮训标志
       searchSrt: null,
       type: null,
@@ -163,7 +179,7 @@ export default {
   },
   methods: {
     initData: function () {
-      this.getDeviceChannelList();
+      this.getAtonList();
     },
     initParam: function () {
       this.currentPage = 1;
@@ -175,9 +191,9 @@ export default {
     },
     handleSizeChange: function (val) {
       this.count = val;
-      this.getDeviceChannelList();
+      this.getAtonList();
     },
-    getDeviceChannelList: function () {
+    getAtonList: function () {
       let that = this;
       this.$axios({
         method: 'post',
@@ -202,7 +218,7 @@ export default {
         console.log(error);
       });
     },
-    showDevice: function () {
+    showAton: function () {
       this.initParam();
       this.initData();
     },
@@ -215,28 +231,42 @@ export default {
       this.initParam();
       this.initData();
     },
-    async handleButtonClick(row) {
-      // 记录当前行
-      this.currentRow = row;
-      // 调用方法获取 atonList 数据
-      await this.checkAtonCameraList(row);
-      // 显示弹框
-      this.popoverVisible = true;
+    play: function (channel) {
+      console.info("play: " + JSON.stringify(channel))
+      let deviceId = channel.parentId;
+      let channelId = channel.deviceId;
+      console.log("通知设备推流1：" + deviceId + " : " + channelId);
+      let that = this;
+      this.$axios({
+        method: 'get',
+        url: '/api/play/start/' + deviceId + '/' + channelId
+      }).then(function (res) {
+        if (res.data.code === 0) {
+          that.$refs.devicePlayer.openDialog("media", deviceId, channelId, {
+            streamInfo: res.data.data,
+            hasAudio: channel.hasAudio
+          });
+        } else {
+          console.log("play error")
+        }
+      }).catch(function (e) {
+        console.error(e)
+      });
     },
     checkAtonCameraList: function (row) {
-      let that = this;
+      this.popoverContent = null;
+      console.log("checkAtonCameraList")
       this.$axios({
         method: 'post',
         url: `/api/v1/device/checkatoncameralist`,
         data: {
           name: row.name,
-          radius: that.checkRadius
+          radius: this.checkRadius
         }
-      }).then(function (res) {
+      }).then((res) => {
         console.log(res)
         if (res.status === 200) {
-          that.total = res.data.total;
-          that.checkResultList = res.data.list;
+          this.popoverContent = res.data.list;
         }
       }).catch(function (error) {
         console.log(error);

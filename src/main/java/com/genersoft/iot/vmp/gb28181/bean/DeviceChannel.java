@@ -191,6 +191,10 @@ public class DeviceChannel extends CommonGBChannel {
 	@Schema(description = "通道类型， 默认0, 0： 普通通道，1 行政区划 2 业务分组/虚拟组织")
 	private int channelType;
 
+	private int toAtonDistance;
+
+	private String relativeAtonDirection;
+
 	public void setPtzType(int ptzType) {
 		this.ptzType = ptzType;
 		switch (ptzType) {

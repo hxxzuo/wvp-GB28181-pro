@@ -7,6 +7,7 @@ import com.genersoft.iot.vmp.conf.security.JwtUtils;
 import com.genersoft.iot.vmp.gb28181.bean.Device;
 import com.genersoft.iot.vmp.gb28181.bean.DeviceChannel;
 import com.genersoft.iot.vmp.gb28181.bean.SyncStatus;
+import com.genersoft.iot.vmp.gb28181.service.IAtonService;
 import com.genersoft.iot.vmp.gb28181.service.IDeviceChannelService;
 import com.genersoft.iot.vmp.gb28181.service.IDeviceService;
 import com.genersoft.iot.vmp.gb28181.service.IInviteStreamService;
@@ -44,17 +45,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.text.ParseException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Tag(name  = "国标设备查询", description = "国标设备查询")
 @SuppressWarnings("rawtypes")
 @Slf4j
 @RestController
 @RequestMapping("/api/device/query")
-public class DeviceQuery {
+public class DeviceQueryController {
 
 	@Autowired
 	private IDeviceChannelService deviceChannelService;
@@ -73,6 +71,14 @@ public class DeviceQuery {
 
 	@Autowired
 	private DynamicTask dynamicTask;
+
+	@Autowired
+	private IAtonService atonService;
+
+	@GetMapping("/devices/allChannel")
+	public PageInfo<DeviceChannel> getAllDeviceChannel(){
+		return atonService.getAllDeviceChannel();
+	}
 
 	/**
 	 * 使用ID查询国标设备
@@ -129,6 +135,7 @@ public class DeviceQuery {
 
 		return deviceChannelService.queryChannelsByDeviceId(deviceId, query, channelType, online, page, count);
 	}
+
 
 	/**
 	 * 同步设备通道

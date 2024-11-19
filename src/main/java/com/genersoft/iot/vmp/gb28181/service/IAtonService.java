@@ -9,4 +9,6 @@ public interface IAtonService {
     PageInfo<Aton>  queryAton(int page, int count, String name,String type);
 
     PageInfo<DeviceChannel>  checkAtonCameraList(int page, int count, String name, Integer radius);
+
+    public PageInfo<DeviceChannel> getAllDeviceChannel();
 }

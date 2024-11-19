@@ -50,4 +50,38 @@ public class GpsUtil {
 
         return EARTH_RADIUS * c * 1000;
     }
+
+    public static String calculateRelativeDirection(double lat1, double lng1, double lat2, double lng2) {
+        double dLng = lng2 - lng1;
+        double dLat = lat2 - lat1;
+
+        double angle = Math.atan2(dLng, dLat) * 180.0 / Math.PI;
+
+        // 将角度转换为0-360度
+        angle = (angle + 360.0) % 360.0;
+
+        // 确定方位
+        String direction;
+        if (angle >= 0 && angle < 22.5) {
+            direction = "北";
+        } else if (angle >= 22.5 && angle < 67.5) {
+            direction = "东北";
+        } else if (angle >= 67.5 && angle < 112.5) {
+            direction = "东";
+        } else if (angle >= 112.5 && angle < 157.5) {
+            direction = "东南";
+        } else if (angle >= 157.5 && angle < 202.5) {
+            direction = "南";
+        } else if (angle >= 202.5 && angle < 247.5) {
+            direction = "西南";
+        } else if (angle >= 247.5 && angle < 292.5) {
+            direction = "西";
+        } else if (angle >= 292.5 && angle < 337.5) {
+            direction = "西北";
+        } else {
+            direction = "北";
+        }
+
+        return String.format("%s%d度", direction, (int) angle);
+    }
 }

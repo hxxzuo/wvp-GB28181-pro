@@ -2,9 +2,12 @@
   <div id="mapContainer" ref="mapContainer" style="width: 100%;height: 100%;">
     <button @click="switchSource('onlineMap')">在线地图</button>
     <button @click="switchSource('offlineMap')">离线地图</button>
+    <button @click="$emit('showAllCameraLocation-event', '')">展示所有摄像头定位</button>
+    <button @click="$emit('showAllAtonLocation-event', '')">展示所有航标定位</button>
     <div class="mapInfo">
       <p>缩放等级: {{ Math.round(zoomLevel) }}  经纬度: {{ mouseCoordinates.lon.toFixed(4) }},{{ mouseCoordinates.lat.toFixed(4) }}</p>
     </div>
+
   </div>
 
 </template>
@@ -28,10 +31,7 @@ import {get as getProj, fromLonLat, toLonLat} from 'ol/proj';
 import {ZoomSlider, Zoom, FullScreen} from 'ol/control';
 import {containsCoordinate} from 'ol/extent';
 import { watch } from 'vue';
-
 import {v4}  from 'uuid'
-import source from "echarts/src/data/Source";
-
 let olMap = null;
 
 export default {
