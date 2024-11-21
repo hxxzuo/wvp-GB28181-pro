@@ -2,8 +2,8 @@
   <div id="mapContainer" ref="mapContainer" style="width: 100%;height: 100%;">
     <button @click="switchSource('onlineMap')">在线地图</button>
     <button @click="switchSource('offlineMap')">离线地图</button>
-    <button @click="$emit('showAllCameraLocation-event', '')">展示所有摄像头定位</button>
-    <button @click="$emit('showAllAtonLocation-event', '')">展示所有航标定位</button>
+    <button @click="$emit('showAllCameraLocation-event', '')">展示/隐藏所有摄像头</button>
+    <button @click="$emit('showAllAtonLocation-event', '')">展示/隐藏所有航标</button>
     <div class="mapInfo">
       <p>缩放等级: {{ Math.round(zoomLevel) }}  经纬度: {{ mouseCoordinates.lon.toFixed(4) }},{{ mouseCoordinates.lat.toFixed(4) }}</p>
     </div>
@@ -23,6 +23,7 @@ import VectorLayer from 'ol/layer/Vector';
 import Style from 'ol/style/Style';
 import Stroke from 'ol/style/Stroke';
 import Icon from 'ol/style/Icon';
+import Text from 'ol/style/Text';
 import View from 'ol/View';
 import Feature from 'ol/Feature';
 import Overlay from 'ol/Overlay';
@@ -36,6 +37,7 @@ let olMap = null;
 
 export default {
     name: 'MapComponent',
+    props: ['parentData'],
     data() {
         return {
           zoomLevel: 10,
@@ -54,7 +56,6 @@ export default {
       })
 
     },
-    props: [],
     mounted () {
     },
     methods: {
@@ -117,6 +118,21 @@ export default {
           const [lon, lat] = toLonLat(olMap.getEventCoordinate(event.originalEvent));
           this.mouseCoordinates = { lon, lat };
         });
+
+        olMap.on('moveend', () => {
+          const zoomLevel = olMap.getView().getZoom(); // 获取当前缩放级别
+            parentData.setStyle((style) => {
+            console.log("moveend")
+            const shouldShowText = zoomLevel > 10; // 控制文字显示的缩放级别
+            if (!shouldShowText){
+              return style
+            }
+            if (style.text!= null){
+              style.text = null
+            }
+            return style
+          });
+        })
       },
       switchSource(sourceType) {
         this.tileLayer.setSource(sourceType==='onlineMap'? this.onLineTileLayerSource: this.offlineTileLayerSource);
@@ -227,13 +243,25 @@ export default {
           for (let i = 0; i < data.length; i++) {
             let feature = new Feature(new Point(fromLonLat(data[i].position)));
             feature.customData = data[i].data;
-            let cloneStyle = style.clone()
-            cloneStyle.setImage(new Icon({
+            let iconStyle = new Icon({
               anchor: data[i].image.anchor,
               crossOrigin: 'Anonymous',
               src: data[i].image.src,
-            }))
-            feature.setStyle(cloneStyle)
+            });
+
+            let textStyle = new Text({
+              text: data[i].label.text || '',
+              offsetX: data[i].label.offset[0] || 0,
+              offsetY: data[i].label.offset[1] || -30,
+              font: data[i].label.font || '12px Arial',
+              // fill: new Fill({ color: data[i].label.fill || 'black' }),
+              stroke: new Stroke({ color: data[i].label.stroke || 'white', width: data[i].label.strokeWidth || 2 }),
+            });
+
+            let featureStyle = new Style({
+              image: iconStyle, text: textStyle,
+            });
+            feature.setStyle(featureStyle)
             features.push(feature);
           }
           let source = new VectorSource();
@@ -241,11 +269,13 @@ export default {
           let vectorLayer = new VectorLayer({
             source:source,
             style:style,
-            renderMode:"image",
+            renderMode:"vector",
             declutter: false
           })
           olMap.addLayer(vectorLayer)
+
           if (typeof clickEvent == "function") {
+            console.log("clickEvent")
             olMap.on("click", (event)=>{
               vectorLayer.getFeatures(event.pixel).then((features)=>{
                 if (features.length > 0) {

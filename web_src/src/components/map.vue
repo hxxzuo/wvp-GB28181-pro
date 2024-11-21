@@ -6,7 +6,7 @@
       </el-aside>
       <el-main style="height: 91vh; padding: 0">
         <MapComponent ref="map" @showAllCameraLocation-event="showAllCameraLocation"
-                      @showAllAtonLocation-event="showAllAtonLocation"></MapComponent>
+                      @showAllAtonLocation-event="showAllAtonLocation" :parentData="this.layer"></MapComponent>
       </el-main>
     </el-container>
     <div v-if="!onOff" style="width: 100%; height:100%; text-align: center; line-height: 5rem">
@@ -58,8 +58,8 @@
           <el-descriptions-item label="经纬度">{{ aton["longitude"] }},{{ aton["latitude"] }}</el-descriptions-item>
           <el-descriptions-item label="管辖单位">{{ aton["administer"] }}</el-descriptions-item>
           <el-descriptions-item label="维护单位">{{ aton["maintenance"] }}</el-descriptions-item>
-          <el-descriptions-item label="所属单位">{{ [aton["belong"]] }}</el-descriptions-item>
-          <el-descriptions-item label="水域">{{ [aton["waters"]] }}</el-descriptions-item>
+          <el-descriptions-item label="所属单位">{{ aton["belong"] }}</el-descriptions-item>
+          <el-descriptions-item label="水域">{{ aton["waters"] }}</el-descriptions-item>
         </el-descriptions>
         <span class="infobox-close el-icon-close" @click="closeAtonInfoBox()"></span>
       </div>
@@ -93,6 +93,7 @@ export default {
       onOff: true,
       deviceService: new DeviceService(),
       layer: null,
+      atonLayer: null,
       lineLayer: null,
       channel: null,
       aton: null,
@@ -181,6 +182,12 @@ export default {
       });
     },
     showAllCameraLocation: function () {
+      if (this.layer != null) {
+        this.$refs.map.removeLayer(this.layer);
+        this.layer = null
+        return
+      }
+
       this.$axios({
         method: 'get',
         url: `/api/device/query/devices/allChannel`,
@@ -200,6 +207,14 @@ export default {
               anchor: [0.5, 1],
             },
             data: channel, // 保存当前元素信息
+            label: {
+              text: channel.gbName, // 显示名称
+              offset: [0, -30], // 文字偏移，确保在图标上方
+              font: '12px Calibri', // 字体样式
+              fill: 'black', // 文字颜色
+              stroke: 'white', // 边框颜色
+              strokeWidth: 2, // 边框宽度
+            }
           }));
 
           // 添加所有元素图层
@@ -217,6 +232,11 @@ export default {
       });
     },
     showAllAtonLocation: function () {
+      if (this.atonLayer != null) {
+        this.$refs.map.removeLayer(this.atonLayer);
+        this.atonLayer = null
+        return
+      }
       this.$axios({
         method: 'post',
         url: `/api/v1/device/atonlist`,
@@ -227,8 +247,8 @@ export default {
       }).then((res) => {
         console.log(res)
         if (res.status === 200) {
-          if (this.layer != null) {
-            this.$refs.map.removeLayer(this.layer);
+          if (this.atonLayer != null) {
+            this.$refs.map.removeLayer(this.atonLayer);
           }
           this.closeInfoBox()
           const atons = res.data.list;
@@ -239,9 +259,17 @@ export default {
               anchor: [0.5, 1],
             },
             data: aton, // 保存当前元素信息
+            label: {
+              text: aton.name, // 显示名称
+              offset: [0, -30], // 文字偏移，确保在图标上方
+              font: '12px Calibri', // 字体样式
+              fill: 'black', // 文字颜色
+              stroke: 'white', // 边框颜色
+              strokeWidth: 1, // 边框宽度
+            }
           }));
 
-          this.layer = this.$refs.map.addLayer(layerData, this.atonFeatureClickEvent);
+          this.atonLayer = this.$refs.map.addLayer(layerData, this.atonFeatureClickEvent);
         }
       }).catch(function (error) {
         console.log(error);
@@ -435,7 +463,7 @@ export default {
       })
     },
     atonFeatureClickEvent: function (atons) {
-      this.closeInfoBox()
+      this.closeAtonInfoBox()
       if (atons.length > 0) {
         this.aton = atons[0]
       }
