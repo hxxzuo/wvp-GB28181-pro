@@ -26,6 +26,7 @@ public class AtonServiceImpl implements IAtonService {
     @Autowired
     private DeviceChannelMapper deviceChannelMapper;
 
+
     @Override
     public PageInfo<Aton> queryAton(int page, int count, String name, String type) {
         PageHelper.startPage(page, count);
@@ -36,14 +37,24 @@ public class AtonServiceImpl implements IAtonService {
             type = null;
         }
         List<Aton> all = atonMapper.queryAtonList(name, type);
+        all.forEach(aton -> {
+            double[] p = GpsUtil.wgs84ToGcj02(aton.getLongitude(), aton.getLatitude());
+            aton.setLongitude(p[0]);
+            aton.setLatitude(p[1]);
+        });
         return new PageInfo<>(all);
     }
 
     @Override
     public PageInfo<DeviceChannel> checkAtonCameraList(int page, int count, String name, Integer radius) {
         List<Aton> all = atonMapper.queryAtonList(name, null);
+        if (CollectionUtils.isEmpty(all)) {
+            return new PageInfo<>();
+        }
         Aton aton = all.get(0);
-
+        double[] p = GpsUtil.wgs84ToGcj02(aton.getLongitude(), aton.getLatitude());
+        aton.setLongitude(p[0]);
+        aton.setLatitude(p[1]);
         PageHelper.startPage(page, count);
         List<DeviceChannel> deviceChannels = deviceChannelMapper.getAllDeviceLocation();
         if (CollectionUtils.isEmpty(deviceChannels)) {
@@ -68,4 +79,5 @@ public class AtonServiceImpl implements IAtonService {
         }
         return new PageInfo<>(deviceChannels);
     }
+
 }

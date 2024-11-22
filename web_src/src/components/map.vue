@@ -467,9 +467,10 @@ export default {
       if (atons.length > 0) {
         this.aton = atons[0]
       }
-      console.log("atonFeatureClickEvent:" + JSON.stringify(this.aton))
+
       this.$nextTick(() => {
         let position = [this.aton['longitude'], this.aton['latitude']];
+        console.log("atonFeatureClickEvent position:" + JSON.stringify(position))
         this.atonInfoBoxId = this.$refs.map.openInfoBox(position, this.$refs.atoninfobox, [0, -50])
       })
     },

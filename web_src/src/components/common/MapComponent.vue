@@ -119,20 +119,20 @@ export default {
           this.mouseCoordinates = { lon, lat };
         });
 
-        olMap.on('moveend', () => {
-          const zoomLevel = olMap.getView().getZoom(); // 获取当前缩放级别
-            parentData.setStyle((style) => {
-            console.log("moveend")
-            const shouldShowText = zoomLevel > 10; // 控制文字显示的缩放级别
-            if (!shouldShowText){
-              return style
-            }
-            if (style.text!= null){
-              style.text = null
-            }
-            return style
-          });
-        })
+        // olMap.on('moveend', () => {
+        //   const zoomLevel = olMap.getView().getZoom(); // 获取当前缩放级别
+        //     parentData.setStyle((style) => {
+        //     console.log("moveend")
+        //     const shouldShowText = zoomLevel > 10; // 控制文字显示的缩放级别
+        //     if (!shouldShowText){
+        //       return style
+        //     }
+        //     if (style.text!= null){
+        //       style.text = null
+        //     }
+        //     return style
+        //   });
+        // })
       },
       switchSource(sourceType) {
         this.tileLayer.setSource(sourceType==='onlineMap'? this.onLineTileLayerSource: this.offlineTileLayerSource);
@@ -249,18 +249,24 @@ export default {
               src: data[i].image.src,
             });
 
-            let textStyle = new Text({
-              text: data[i].label.text || '',
-              offsetX: data[i].label.offset[0] || 0,
-              offsetY: data[i].label.offset[1] || -30,
-              font: data[i].label.font || '12px Arial',
-              // fill: new Fill({ color: data[i].label.fill || 'black' }),
-              stroke: new Stroke({ color: data[i].label.stroke || 'white', width: data[i].label.strokeWidth || 2 }),
-            });
-
-            let featureStyle = new Style({
-              image: iconStyle, text: textStyle,
-            });
+            let featureStyle = null
+            if (data[i].label != null){
+              let textStyle = new Text({
+                text: data[i].label.text || '',
+                offsetX: data[i].label.offset[0] || 0,
+                offsetY: data[i].label.offset[1] || -30,
+                font: data[i].label.font || '12px Arial',
+                // fill: new Fill({ color: data[i].label.fill || 'black' }),
+                stroke: new Stroke({ color: data[i].label.stroke || 'white', width: data[i].label.strokeWidth || 2 }),
+              });
+              featureStyle = new Style({
+                image: iconStyle, text: textStyle,
+              });
+            }else {
+              featureStyle = new Style({
+                image: iconStyle,
+              });
+            }
             feature.setStyle(featureStyle)
             features.push(feature);
           }
