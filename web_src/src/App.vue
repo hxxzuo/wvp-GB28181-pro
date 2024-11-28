@@ -59,7 +59,9 @@ body,
   height: 100%;
   width: 100%;
 }
-.el-header,
+.el-header{
+  padding: 0px 10px;
+}
 .el-footer {
   /* background-color: #b3c0d1; */
   color: #333;
@@ -71,6 +73,7 @@ body,
   color: #333;
   text-align: center;
   padding-top: 0px !important;
+  padding: 0px 10px;
 }
 
 /*定义滚动条高宽及背景 高宽分别对应横竖滚动条的尺寸*/

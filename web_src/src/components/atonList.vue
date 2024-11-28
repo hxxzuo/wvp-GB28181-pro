@@ -51,8 +51,8 @@
           <el-table-column label="经纬度" min-width="100">
             <template slot-scope="scope">
               <span size="medium"
-                    v-if="scope.row.longitude && scope.row.latitude">{{ scope.row.longitude }}<br/>{{
-                  scope.row.latitude
+                    v-if="scope.row.longitude && scope.row.latitude">{{ scope.row.longitude.toFixed(6) }}<br/>{{
+                  scope.row.latitude.toFixed(6)
                 }}</span>
               <span size="medium" v-if="!scope.row.longitude || !scope.row.latitude">无</span>
             </template>
@@ -79,8 +79,12 @@
               >
                 <div v-if="popoverContent">
                   <el-table :data="popoverContent" style="max-width: 700px; max-height: 400px; overflow: auto;">
-                    <el-table-column prop="name" label="名称" width="300px"></el-table-column>
-                    <el-table-column prop="ptzTypeText" label="类型" show-overflow-tooltip></el-table-column>
+                    <el-table-column prop="gbName" label="名称" width="300px"></el-table-column>
+                    <el-table-column prop="gbPtzType" label="类型" show-overflow-tooltip>
+                      <template slot-scope="scope">
+                        {{ typeMapping(scope.row.gbPtzType) }}
+                      </template>
+                    </el-table-column>
                     <el-table-column prop="toAtonDistance" label="距离(米)" show-overflow-tooltip></el-table-column>
                     <el-table-column prop="relativeAtonDirection" label="相对航标方位"
                                      show-overflow-tooltip></el-table-column>
@@ -160,7 +164,7 @@ export default {
       isLoging: false,
       showTree: false,
       loadSnap: {},
-      ptzTypes: {
+      ptzType: {
         0: "未知",
         1: "球机",
         2: "半球",
@@ -178,6 +182,9 @@ export default {
     clearTimeout(this.updateLooper);
   },
   methods: {
+    typeMapping(value) {
+      return this.ptzType[value] || '未知类型';
+    },
     initData: function () {
       this.getAtonList();
     },

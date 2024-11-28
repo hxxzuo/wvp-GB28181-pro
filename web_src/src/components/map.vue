@@ -1,10 +1,10 @@
 <template>
   <div id="devicePosition" style="width: 100vw; height: 91vh;">
     <el-container v-if="onOff" style="height: 91vh;" v-loading="isLoging">
-      <el-aside width="400px" style="background-color: #ffffff">
+      <el-aside width="400px" style="background-color: #ffffff; font-size: 14px;">
         <DeviceTree ref="deviceTree" :clickEvent="clickEvent" :contextMenuEvent="contextmenuEventHandler"></DeviceTree>
       </el-aside>
-      <el-main style="height: 91vh; padding: 0">
+      <el-main style="height: 100%; padding: 0">
         <MapComponent ref="map" @showAllCameraLocation-event="showAllCameraLocation"
                       @showAllAtonLocation-event="showAllAtonLocation" :parentData="this.layer"></MapComponent>
       </el-main>

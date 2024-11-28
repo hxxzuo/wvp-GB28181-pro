@@ -3,7 +3,7 @@
     <el-container>
       <el-header>
         <div style="display: grid; grid-template-columns: auto auto">
-          <div>通道列表</div>
+          <div style="font-size: 16px;">通道列表</div>
           <div>
             <el-switch
               v-model="showRegion"
