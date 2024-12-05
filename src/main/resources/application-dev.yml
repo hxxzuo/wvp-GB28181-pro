@@ -74,8 +74,10 @@ sip:
 
 #zlm 默认服务器配置
 media:
-  id: 流媒体处理服务器-dev
+  id: zlmediakit-local
+#  wan_ip: 200.200.200.111
   # [必须修改] zlm服务器的内网IP
+#  ip: 200.200.200.111
   ip: 198.28.51.75
   # [必须修改] zlm服务器的http.port
   http-port: 8780

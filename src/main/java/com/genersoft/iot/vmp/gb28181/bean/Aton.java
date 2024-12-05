@@ -16,6 +16,6 @@ public class Aton {
     private String maintenance;
     private String belong;
     private String waters;
-
+    private String image;
 
 }

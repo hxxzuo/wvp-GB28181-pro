@@ -68,7 +68,7 @@ sip:
   # [可选]
   id: 41010500002000000001
   # [可选] 默认设备认证密码，后续扩展使用设备单独密码, 移除密码将不进行校验
-  password: 12345678
+  password:
   # 是否存储alarm信息
   alarm: false
 
@@ -76,7 +76,7 @@ sip:
 media:
   id: zlmediakit-local
   # [必须修改] zlm服务器的内网IP
-  ip: 198.28.51.75
+  ip: 200.200.200.111
   # [必须修改] zlm服务器的http.port
   http-port: 9092
   # [必选选] zlm服务器的hook.admin_params=secret

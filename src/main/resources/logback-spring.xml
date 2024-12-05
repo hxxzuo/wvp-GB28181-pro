@@ -22,6 +22,13 @@
 			<!--设置日志级别 接收info级别的日志-->
 			<level>DEBUG</level>
 		</filter>
+<!--		<filter class="ch.qos.logback.core.filter.EvaluatorFilter">-->
+<!--			<evaluator class="ch.qos.logback.classic.boolex.JaninoEventEvaluator">-->
+<!--				<expression>return message.contains("serving msg on call id");</expression>-->
+<!--			</evaluator>-->
+<!--			<onMatch>DENY</onMatch>-->
+<!--			<onMismatch>ACCEPT</onMismatch>-->
+<!--		</filter>-->
 	</appender>
 
 	<!-- WebSocket -->
@@ -53,6 +60,13 @@
 			<!--设置日志级别 接收info级别的日志-->
 			<level>DEBUG</level>
 		</filter>
+<!--		<filter class="ch.qos.logback.core.filter.EvaluatorFilter">-->
+<!--			<evaluator class="ch.qos.logback.classic.boolex.JaninoEventEvaluator">-->
+<!--				<expression>return message.contains("serving msg on call id");</expression>-->
+<!--			</evaluator>-->
+<!--			<onMatch>DENY</onMatch>-->
+<!--			<onMismatch>ACCEPT</onMismatch>-->
+<!--		</filter>-->
 	</appender>
 
 	<!-- 生成 SIP日志追加 -->

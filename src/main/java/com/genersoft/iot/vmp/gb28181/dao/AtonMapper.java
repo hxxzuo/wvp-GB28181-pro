@@ -24,7 +24,8 @@ public interface AtonMapper {
             "administer," +
             "maintenance," +
             "belong," +
-            "waters" +
+            "waters," +
+            "image" +
             " FROM aton de" +
             " where 1 = 1 " +
             " <if test='name != null'> AND de.name='${name}' </if> " +
