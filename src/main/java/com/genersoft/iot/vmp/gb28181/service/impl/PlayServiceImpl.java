@@ -615,6 +615,9 @@ public class PlayServiceImpl implements IPlayService {
                     break;
                 }
             }
+//            if (sdp.getConnection().getAddress().equals("10.10.1.250")){
+//                sdp.getConnection().setAddress("36.141.37.130");
+//            }
             log.info("[TCP主动连接对方] deviceId: {}, channelId: {}, 连接对方的地址：{}:{}, 收流模式：{}, SSRC: {}, SSRC校验：{}", device.getDeviceId(), channel.getDeviceId(), sdp.getConnection().getAddress(), port, device.getStreamMode(), ssrcInfo.getSsrc(), device.isSsrcCheck());
             Boolean result = mediaServerService.connectRtpServer(mediaServerItem, sdp.getConnection().getAddress(), port, ssrcInfo.getStream());
             log.info("[TCP主动连接对方] 结果： {}" , result);
