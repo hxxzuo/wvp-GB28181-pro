@@ -30,6 +30,7 @@ public interface AtonMapper {
             " where 1 = 1 " +
             " <if test='name != null'> AND de.name='${name}' </if> " +
             " <if test='type != null'> AND de.type='${type}' </if> " +
+            " <if test='administrator != null'> AND de.administrator='${administrator}' </if> " +
             " </script>")
-    List<Aton> queryAtonList(@Param("name") String name,@Param("type") String type);
+    List<Aton> queryAtonList(@Param("name") String name,@Param("type") String type,@Param("administrator") String administrator);
 }

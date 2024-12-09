@@ -58,8 +58,8 @@ server:
 
 # 作为28181服务器的配置
 sip:
-#  ip: 200.200.200.111
-  ip: 192.168.31.182
+  ip: 200.200.200.111
+#  ip: 192.168.31.182
   # [可选] 28181服务监听的端口
   port: 8116
   # 根据国标6.1.2中规定，domain宜采用ID统一编码的前十位编码。国标附录D中定义前8位为中心编码（由省级、市级、区级、基层编号组成，参照GB/T 2260-2007）
@@ -78,19 +78,20 @@ sip:
 media:
   id: zlmediakit-local
 #  wan_ip: 183.62.26.194
-#  stream-ip: 200.200.200.111
-  stream-ip: 192.168.31.182
-#  sdp-ip: 183.62.26.194
-  sdp-ip: 120.231.138.143
+  stream-ip: 200.200.200.111
+#  stream-ip: 192.168.31.182
+  sdp-ip: 183.62.26.194
+#  sdp-ip: 120.231.138.143
   # [必须修改] zlm服务器的内网IP
-#  ip: 200.200.200.111
+  ip: 200.200.200.111
 #  ip: 198.28.51.75
-  ip: 192.168.31.182
+#  ip: 192.168.31.182
   # [必须修改] zlm服务器的http.port
   http-port: 8780
   # [必选选] zlm服务器的hook.admin_params=secret
   secret: DxfRaE0q8ntmuEerzt68bk5QziK9NS2N
   # 启用多端口模式, 多端口模式使用端口区分每路流，兼容性更好。 单端口使用流的ssrc区分， 点播超时建议使用多端口测试
+  record-day: 3
   rtp:
     # [可选] 是否启用多端口模式, 开启后会在portRange范围内选择端口用于媒体流传输
     enable: true
@@ -107,7 +108,7 @@ user-settings:
   # 推流直播是否录制
   record-push-live: true
   # 国标是否录制
-  record-sip: true
+  record-sip: false
   # 国标点播 按需拉流, true：有人观看拉流，无人观看释放， false：拉起后不自动释放
   stream-on-demand: true
 

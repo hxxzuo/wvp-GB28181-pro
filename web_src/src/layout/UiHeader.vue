@@ -21,8 +21,12 @@
         <el-menu-item index="/channel/group">业务分组</el-menu-item>
       </el-submenu>
       <el-menu-item index="/atonList">航标列表</el-menu-item>
-      <el-menu-item index="">巡视计划</el-menu-item>
-      <el-menu-item index="">识别结果</el-menu-item>
+      <el-submenu index="/schedule">
+        <template slot="title">智能巡视</template>
+        <el-menu-item index="/checkScheduleList">巡视计划</el-menu-item>
+        <el-menu-item index="/derivativeTask">派生任务</el-menu-item>
+        <el-menu-item index="/checkResult">巡视结果</el-menu-item>
+      </el-submenu>
       <el-submenu index="/setting">
         <template slot="title">系统设置</template>
         <el-menu-item v-if="editUser" index="/userManager">用户管理</el-menu-item>
@@ -196,7 +200,7 @@ export default {
 #UiHeader .el-menu-item.is-active {
   color: #fff !important;
   background-color: #1890ff !important;
-  font-size: 12px;
+  font-size: 14px;
 }
 #UiHeader .el-submenu.is-active {
   background-color: #1890ff !important;

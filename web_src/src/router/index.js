@@ -27,6 +27,7 @@ import region from '../components/region.vue'
 import group from '../components/group.vue'
 import operations from '../components/operations.vue'
 import aton from '../components/atonList.vue'
+import checkSchedule from "../components/CheckSchedule.vue";
 
 const originalPush = VueRouter.prototype.push
 VueRouter.prototype.push = function push(location) {
@@ -143,6 +144,11 @@ export default new VueRouter({
         {
           path: '/operations',
           component: operations,
+        },
+        {
+          path: '/checkScheduleList',
+          name: 'checkSchedule',
+          component: checkSchedule,
         },
         ]
     },

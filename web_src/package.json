@@ -35,6 +35,7 @@
     "vue-ztree-2.0": "^1.0.4"
   },
   "devDependencies": {
+    "@vue/babel-preset-app": "^5.0.8",
     "autoprefixer": "^7.1.2",
     "babel-core": "^6.22.1",
     "babel-helper-vue-jsx-merge-props": "^2.0.3",
@@ -63,6 +64,7 @@
     "shelljs": "^0.8.5",
     "uglifyjs-webpack-plugin": "^1.1.1",
     "url-loader": "^0.5.8",
+    "vue-cron-generator": "^0.2.4",
     "vue-loader": "^13.3.0",
     "vue-style-loader": "^3.0.1",
     "vue-template-compiler": "^2.5.2",

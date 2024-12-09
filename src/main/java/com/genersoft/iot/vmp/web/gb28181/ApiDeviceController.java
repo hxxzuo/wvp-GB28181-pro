@@ -3,15 +3,14 @@ package com.genersoft.iot.vmp.web.gb28181;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.genersoft.iot.vmp.conf.exception.ControllerException;
-import com.genersoft.iot.vmp.gb28181.bean.Aton;
-import com.genersoft.iot.vmp.gb28181.bean.Device;
-import com.genersoft.iot.vmp.gb28181.bean.DeviceChannel;
-import com.genersoft.iot.vmp.gb28181.bean.PresetQuerySipReq;
+import com.genersoft.iot.vmp.gb28181.bean.*;
 import com.genersoft.iot.vmp.gb28181.controller.bean.AtonCameraListParam;
 import com.genersoft.iot.vmp.gb28181.controller.bean.AtonQueryParam;
+import com.genersoft.iot.vmp.gb28181.controller.bean.CheckScheduleQueryParam;
 import com.genersoft.iot.vmp.gb28181.service.IAtonService;
 import com.genersoft.iot.vmp.gb28181.service.IDeviceChannelService;
 import com.genersoft.iot.vmp.gb28181.service.IDeviceService;
+import com.genersoft.iot.vmp.gb28181.service.IScheduleService;
 import com.genersoft.iot.vmp.gb28181.transmit.callback.DeferredResultHolder;
 import com.genersoft.iot.vmp.gb28181.transmit.callback.RequestMessage;
 import com.genersoft.iot.vmp.gb28181.transmit.cmd.impl.SIPCommander;
@@ -51,6 +50,8 @@ public class ApiDeviceController {
     private IDeviceService deviceService;
     @Autowired
     private IAtonService atonService;
+    @Autowired
+    private IScheduleService scheduleService;
 
     /**
      * 分页获取设备列表 现在直接返回，尚未实现分页
@@ -264,5 +265,25 @@ public class ApiDeviceController {
     public PageInfo checkAtonCameraList(@RequestBody AtonCameraListParam param) {
         PageInfo<DeviceChannel> atons = atonService.checkAtonCameraList(1, 10, param.getName(), param.getRadius());
         return atons;
+    }
+
+    @DeleteMapping(value = "/schedule/delete/{id}")
+    public void deleteCheckSchedule(@PathVariable long id) {
+        scheduleService.delete(id);
+    }
+
+    @PutMapping(value = "/schedule/update/{id}")
+    public void updateCheckSchedule(@PathVariable long id, @RequestBody CheckSchedule param) {
+        scheduleService.update(param);
+    }
+
+    @PostMapping(value = "/schedule/add")
+    public void addCheckSchedule(@RequestBody CheckSchedule param) {
+        scheduleService.add(param);
+    }
+
+    @PostMapping(value = "/schedule/list")
+    public PageInfo<CheckSchedule> checkScheduleList(@RequestBody CheckScheduleQueryParam param) {
+        return scheduleService.query(param.getPage(), param.getCount(), param.getName());
     }
 }
