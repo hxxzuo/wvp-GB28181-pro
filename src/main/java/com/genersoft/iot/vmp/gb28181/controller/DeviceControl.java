@@ -24,6 +24,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.async.DeferredResult;
@@ -37,6 +38,7 @@ import java.util.UUID;
 @Slf4j
 @RestController
 @RequestMapping("/api/device/control")
+@Service
 public class DeviceControl {
 
     @Autowired
@@ -112,8 +114,8 @@ public class DeviceControl {
 				resultHolder.invokeAllResult(msg);
 			},null);
 		} catch (InvalidArgumentException | SipException | ParseException e) {
-			log.error("[命令发送失败] 开始/停止录像: {}", e.getMessage());
-			throw new ControllerException(ErrorCode.ERROR100.getCode(), "命令发送失败: " + e.getMessage());
+			log.error("[命令发送失败] 开始/停止录像失败: ", e);
+			throw new ControllerException(ErrorCode.ERROR100.getCode(), "命令发送失败: " + e);
 		}
 
 		return result;

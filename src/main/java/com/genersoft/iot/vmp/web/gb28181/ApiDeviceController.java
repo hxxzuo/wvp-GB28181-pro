@@ -4,9 +4,7 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.genersoft.iot.vmp.conf.exception.ControllerException;
 import com.genersoft.iot.vmp.gb28181.bean.*;
-import com.genersoft.iot.vmp.gb28181.controller.bean.AtonCameraListParam;
-import com.genersoft.iot.vmp.gb28181.controller.bean.AtonQueryParam;
-import com.genersoft.iot.vmp.gb28181.controller.bean.CheckScheduleQueryParam;
+import com.genersoft.iot.vmp.gb28181.controller.bean.*;
 import com.genersoft.iot.vmp.gb28181.service.IAtonService;
 import com.genersoft.iot.vmp.gb28181.service.IDeviceChannelService;
 import com.genersoft.iot.vmp.gb28181.service.IDeviceService;
@@ -256,15 +254,22 @@ public class ApiDeviceController {
     }
 
     @PostMapping(value = "/atonlist")
-    public PageInfo atonlist(@RequestBody AtonQueryParam param) {
+    public PageInfo<Aton> atonlist(@RequestBody AtonQueryParam param) {
         PageInfo<Aton> atons = atonService.queryAton(param.getPage(), param.getCount(), param.getName(), param.getType());
         return atons;
     }
 
     @PostMapping(value = "/checkatoncameralist")
-    public PageInfo checkAtonCameraList(@RequestBody AtonCameraListParam param) {
-        PageInfo<DeviceChannel> atons = atonService.checkAtonCameraList(1, 10, param.getName(), param.getRadius());
-        return atons;
+    public PageInfo<DeviceChannel> checkAtonCameraList(@RequestBody AtonCameraListParam param) {
+        PageInfo<DeviceChannel> deviceChannels = atonService.checkAtonCameraList(1, 10, param.getName(), param.getRadius());
+        deviceChannels.getList().forEach(deviceChannel -> {
+            AtonPresetLocation atonPresetLocation = scheduleService.getAtonPresetLocation(param.getAtonId(), deviceChannel.getGbParentId(), deviceChannel.getGbDeviceId());
+            if (atonPresetLocation != null) {
+                deviceChannel.setAtonPresetLocation(atonPresetLocation.getPresetLocation());
+                deviceChannel.setAtonPresetLocationId(atonPresetLocation.getId());
+            }
+        });
+        return deviceChannels;
     }
 
     @DeleteMapping(value = "/schedule/delete/{id}")
@@ -284,6 +289,39 @@ public class ApiDeviceController {
 
     @PostMapping(value = "/schedule/list")
     public PageInfo<CheckSchedule> checkScheduleList(@RequestBody CheckScheduleQueryParam param) {
-        return scheduleService.query(param.getPage(), param.getCount(), param.getName());
+        return scheduleService.queryCheckSchedule(param.getPage(), param.getCount(), param.getName());
+    }
+
+    @PostMapping(value = "/addSubmitPreset")
+    public void addSubmitPreset(@RequestBody AtonPresetLocation param) {
+        AtonPresetLocation atonPresetLocation = new AtonPresetLocation();
+        atonPresetLocation.setAtonId(param.getAtonId());
+        atonPresetLocation.setDeviceId(param.getDeviceId());
+        atonPresetLocation.setChannelId(param.getChannelId());
+        atonPresetLocation.setPresetLocation(param.getPresetLocation());
+        scheduleService.addAtonPresetLocation(atonPresetLocation);
+    }
+
+    @PostMapping(value = "/updateSubmitPreset")
+    public void updateSubmitPreset(@RequestBody AtonPresetLocation param) {
+        AtonPresetLocation atonPresetLocation = new AtonPresetLocation();
+        atonPresetLocation.setId(param.getId());
+        atonPresetLocation.setAtonId(param.getAtonId());
+        atonPresetLocation.setDeviceId(param.getDeviceId());
+        atonPresetLocation.setChannelId(param.getChannelId());
+        atonPresetLocation.setPresetLocation(param.getPresetLocation());
+        scheduleService.updateAtonPresetLocation(atonPresetLocation);
+    }
+
+    @PostMapping(value = "/checkDerivativeTask/list")
+    public PageInfo<CheckDerivativeTask> checkDerivativeTaskList(@RequestBody CheckDerivativeQueryParam param) {
+        return scheduleService.queryCheckDerivativeTask(param.getPage(), param.getCount(), param.getName());
+    }
+
+    @PostMapping(value = "/checkResult/list")
+    public PageInfo<CheckResult> checkResultList(@RequestBody CheckResultQueryParam param) {
+        PageInfo<CheckResult> results =  scheduleService.queryCheckResult(param.getPage(), param.getCount(), param.getName());
+        log.info("results={}",results.getList());
+        return results;
     }
 }

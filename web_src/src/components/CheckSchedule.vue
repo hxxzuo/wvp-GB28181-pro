@@ -191,12 +191,12 @@ export default {
         ],
       },
       adminOptions: [
-        { value: '广州航标站', label: '广州航标站' },
-        { value: '盐田航标站', label: '盐田航标站' },
-        { value: '蛇口航标站', label: '蛇口航标站' },
-        { value: '南沙航标站', label: '南沙航标站' },
-        { value: '江门航标站', label: '江门航标站' },
-        { value: '阳江航标站', label: '阳江航标站' },
+        { value: '广州航标管理站', label: '广州航标管理站' },
+        { value: '盐田航标管理站', label: '盐田航标管理站' },
+        { value: '蛇口航标管理站', label: '蛇口航标管理站' },
+        { value: '南沙航标管理站', label: '南沙航标管理站' },
+        { value: '江门航标管理站', label: '江门航标管理站' },
+        { value: '阳江航标管理站', label: '阳江航标管理站' },
       ],
     };
   },

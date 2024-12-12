@@ -5,6 +5,7 @@ import lombok.Data;
 @Data
 public class AtonCameraListParam {
 
+    private Long atonId;
     private String name;
     private Integer radius;
 }

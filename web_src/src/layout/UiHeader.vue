@@ -24,8 +24,8 @@
       <el-submenu index="/schedule">
         <template slot="title">智能巡视</template>
         <el-menu-item index="/checkScheduleList">巡视计划</el-menu-item>
-        <el-menu-item index="/derivativeTask">派生任务</el-menu-item>
-        <el-menu-item index="/checkResult">巡视结果</el-menu-item>
+        <el-menu-item index="/checkDerivativeTaskList">派生任务</el-menu-item>
+        <el-menu-item index="/checkResultList">巡视结果</el-menu-item>
       </el-submenu>
       <el-submenu index="/setting">
         <template slot="title">系统设置</template>

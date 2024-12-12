@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration debug="false">
+<configuration debug="true">
 	<!--定义日志文件的存储地址 -->
 	<springProperty scop="context" name="spring.application.name" source="spring.application.name" defaultValue=""/>
 	<property name="LOG_HOME" value="logs" />
@@ -22,13 +22,7 @@
 			<!--设置日志级别 接收info级别的日志-->
 			<level>DEBUG</level>
 		</filter>
-<!--		<filter class="ch.qos.logback.core.filter.EvaluatorFilter">-->
-<!--			<evaluator class="ch.qos.logback.classic.boolex.JaninoEventEvaluator">-->
-<!--				<expression>return message.contains("serving msg on call id");</expression>-->
-<!--			</evaluator>-->
-<!--			<onMatch>DENY</onMatch>-->
-<!--			<onMismatch>ACCEPT</onMismatch>-->
-<!--		</filter>-->
+
 	</appender>
 
 	<!-- WebSocket -->

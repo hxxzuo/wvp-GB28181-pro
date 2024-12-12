@@ -42,6 +42,8 @@
       <el-main style="padding: 5px;">
         <el-table size="medium" ref="channelListTable" :data="atonList" :height="winHeight" style="width: 100%"
                   header-row-class-name="table-header">
+          <el-table-column prop="id" label="id" min-width="100">
+          </el-table-column>
           <el-table-column prop="name" label="名称" min-width="100">
           </el-table-column>
           <el-table-column prop="address" label="地址" min-width="100">
@@ -74,11 +76,11 @@
               <el-popover
                 ref="popover"
                 placement="right"
-                width="700"
+                width="1000"
                 trigger="click"
               >
                 <div v-if="popoverContent">
-                  <el-table :data="popoverContent" style="max-width: 700px; max-height: 400px; overflow: auto;">
+                  <el-table :data="popoverContent" style=" max-height: 400px; overflow: auto;">
                     <el-table-column prop="gbName" label="名称" width="300px"></el-table-column>
                     <el-table-column prop="gbPtzType" label="类型" show-overflow-tooltip>
                       <template slot-scope="scope">
@@ -88,12 +90,16 @@
                     <el-table-column prop="toAtonDistance" label="距离(米)" show-overflow-tooltip></el-table-column>
                     <el-table-column prop="relativeAtonDirection" label="相对航标方位"
                                      show-overflow-tooltip></el-table-column>
+                    <el-table-column prop="atonPresetLocation" label="摄像头预设点"
+                                     show-overflow-tooltip></el-table-column>
                     <el-table-column label="操作" show-overflow-tooltip>
                       <template slot-scope="scope">
                         <el-button type="text" @click="play(scope.row)">播放</el-button>
+                        <el-button type="text" @click="openPresetDialog(scope.row)">标记预设点</el-button>
                       </template>
                     </el-table-column>
                   </el-table>
+
                 </div>
                 <el-button
                   slot="reference"
@@ -114,6 +120,8 @@
                 地图定位
               </el-button>
             </template>
+
+
           </el-table-column>
         </el-table>
         <el-pagination
@@ -129,6 +137,24 @@
       </el-main>
     </el-container>
     <devicePlayer ref="devicePlayer"></devicePlayer>
+    <!-- 弹出对话框 -->
+    <el-dialog
+      title="标记预设点"
+      :visible.sync="presetDialogVisible"
+      width="400px"
+      @close="resetPresetDialog">
+      <div>
+        <el-form :model="presetForm" label-width="80px">
+          <el-form-item label="预设点">
+            <el-input v-model="presetForm.presetLocation" placeholder="请输入预设点"></el-input>
+          </el-form-item>
+        </el-form>
+      </div>
+      <span slot="footer" class="dialog-footer">
+                      <el-button @click="resetPresetDialog">取消</el-button>
+                      <el-button type="primary" @click="submitPreset">确认</el-button>
+                    </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -149,6 +175,12 @@ export default {
   },
   data() {
     return {
+      presetDialogVisible: false, // 控制对话框显示
+      presetForm: {
+        atonId: null,
+        presetLocation: '', // 预设点
+        rowData: null
+      },
       popoverContent: null, // 存储弹出框内容
       cameraTotal: 0,
       deviceService: new DeviceService(),
@@ -176,12 +208,25 @@ export default {
 
   mounted() {
     this.initData();
-
   },
   destroyed() {
     clearTimeout(this.updateLooper);
   },
   methods: {
+    // 显示标记预设点对话框
+    openPresetDialog(row) {
+      console.log(row)
+      this.presetForm.rowData = row; // 保存当前行数据
+      this.presetForm.presetLocation = ''; // 清空输入框
+      this.presetDialogVisible = true; // 显示对话框
+    },
+    // 重置对话框数据
+    resetPresetDialog() {
+      this.presetForm.atonId = '';
+      this.presetForm.presetLocation = '';
+      this.presetForm.rowData = '';
+      this.presetDialogVisible = false
+    },
     typeMapping(value) {
       return this.ptzType[value] || '未知类型';
     },
@@ -220,7 +265,6 @@ export default {
             that.$refs.channelListTable.doLayout();
           })
         }
-
       }).catch(function (error) {
         console.log(error);
       });
@@ -237,6 +281,24 @@ export default {
     refresh: function () {
       this.initParam();
       this.initData();
+    },
+    submitPreset: function () {
+      console.info("submitPreset:"+JSON.stringify(this.presetForm.rowData))
+      this.$axios({
+        method: 'post',
+        url: this.presetForm.rowData.atonPresetLocationId === null? '/api/v1/device/addSubmitPreset':'/api/v1/device/updateSubmitPreset',
+        data: {
+          deviceId: this.presetForm.rowData.gbParentId,
+          channelId: this.presetForm.rowData.gbDeviceId,
+          atonId: this.presetForm.atonId,
+          presetLocation: this.presetForm.presetLocation,
+          id: this.presetForm.rowData.atonPresetLocationId
+        }
+      }).then(function (res) {
+
+      }).catch(function (e) {
+        console.error(e)
+      });
     },
     play: function (channel) {
       console.info("play: " + JSON.stringify(channel))
@@ -261,12 +323,14 @@ export default {
       });
     },
     checkAtonCameraList: function (row) {
+      this.presetForm.atonId = row.id;
       this.popoverContent = null;
       console.log("checkAtonCameraList")
       this.$axios({
         method: 'post',
         url: `/api/v1/device/checkatoncameralist`,
         data: {
+          atonId: row.id,
           name: row.name,
           radius: this.checkRadius
         }

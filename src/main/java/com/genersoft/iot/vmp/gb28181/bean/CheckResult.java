@@ -12,8 +12,12 @@ public class CheckResult {
     private Integer structureResult;
     private Integer colorResult;
     private Integer lightResult;
+    private Timestamp recordStartTime;
+    private Timestamp recordEndTime;
     private Timestamp startTime;
     private Timestamp endTime;
     private Integer status;
     private Long atonId;
+    private String videoUrl;
+    private String imgsUrl;
 }

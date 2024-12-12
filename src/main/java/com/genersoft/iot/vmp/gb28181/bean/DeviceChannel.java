@@ -195,6 +195,11 @@ public class DeviceChannel extends CommonGBChannel {
 
 	private String relativeAtonDirection;
 
+	private Integer atonPresetLocation;
+	private Long atonPresetLocationId;
+
+	private String scheduleTaskResultId;
+
 	public void setPtzType(int ptzType) {
 		this.ptzType = ptzType;
 		switch (ptzType) {

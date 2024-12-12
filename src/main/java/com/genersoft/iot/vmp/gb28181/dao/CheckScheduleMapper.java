@@ -63,4 +63,24 @@ public interface CheckScheduleMapper {
             " WHERE id=#{id}" +
             " </script>"})
     void update(CheckSchedule checkSchedule);
+
+    @Select(" <script>" +
+            "SELECT " +
+            "id," +
+            "name," +
+            "administrators," +
+            "aton_list_id," +
+            "period," +
+            "status," +
+            "priority," +
+            "check_light," +
+            "check_color," +
+            "check_structure" +
+            " FROM check_schedule de" +
+            " where de.id='${id}' " +
+            " </script>")
+    List<CheckSchedule> get(@Param("id") Long id);
+
+    @Select("SELECT LAST_INSERT_ID()")
+    Long getLastInsertId();
 }

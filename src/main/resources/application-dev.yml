@@ -108,7 +108,7 @@ user-settings:
   # 推流直播是否录制
   record-push-live: true
   # 国标是否录制
-  record-sip: false
+  record-sip: true
   # 国标点播 按需拉流, true：有人观看拉流，无人观看释放， false：拉起后不自动释放
   stream-on-demand: true
 

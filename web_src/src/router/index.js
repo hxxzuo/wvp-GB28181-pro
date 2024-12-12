@@ -28,6 +28,8 @@ import group from '../components/group.vue'
 import operations from '../components/operations.vue'
 import aton from '../components/atonList.vue'
 import checkSchedule from "../components/CheckSchedule.vue";
+import checkDerivativeTask from "../components/CheckDerivativeTask.vue";
+import checkResult from "../components/CheckResult.vue";
 
 const originalPush = VueRouter.prototype.push
 VueRouter.prototype.push = function push(location) {
@@ -149,6 +151,16 @@ export default new VueRouter({
           path: '/checkScheduleList',
           name: 'checkSchedule',
           component: checkSchedule,
+        },
+        {
+          path: '/checkDerivativeTaskList',
+          name: 'checkDerivativeTask',
+          component: checkDerivativeTask,
+        },
+        {
+          path: '/checkResultList',
+          name: 'checkResult',
+          component: checkResult,
         },
         ]
     },
