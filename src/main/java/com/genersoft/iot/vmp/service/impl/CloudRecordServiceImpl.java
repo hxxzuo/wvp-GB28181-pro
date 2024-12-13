@@ -238,6 +238,17 @@ public class CloudRecordServiceImpl implements ICloudRecordService {
     }
 
     @Override
+    public DownloadFileInfo getTaskPlayUrlPath(String streamId) {
+        CloudRecordItem recordItem = cloudRecordServiceMapper.getList(null,null,streamId,null,null,null,null,null).get(0);
+        if (recordItem == null) {
+            throw new ControllerException(ErrorCode.ERROR400.getCode(), "资源不存在");
+        }
+        String filePath = recordItem.getFilePath();
+        MediaServer mediaServerItem = mediaServerService.getOne(recordItem.getMediaServerId());
+        return CloudRecordUtils.getDownloadFilePath(mediaServerItem, filePath);
+    }
+
+    @Override
     public List<CloudRecordItem> getAllList(String query, String app, String stream, String startTime, String endTime, List<MediaServer> mediaServerItems, String callId, List<Integer> ids) {
         // 开始时间和结束时间在数据库中都是以秒为单位的
         Long startTimeStamp = null;

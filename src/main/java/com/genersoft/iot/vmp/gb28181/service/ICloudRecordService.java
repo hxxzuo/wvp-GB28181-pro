@@ -52,4 +52,6 @@ public interface ICloudRecordService {
     DownloadFileInfo getPlayUrlPath(Integer recordId);
 
     List<CloudRecordItem> getAllList(String query, String app, String stream, String startTime, String endTime, List<MediaServer> mediaServerItems, String callId, List<Integer> ids);
+
+    DownloadFileInfo getTaskPlayUrlPath(String streamId);
 }

@@ -199,7 +199,7 @@ public class ScheduleService implements IScheduleService {
         log.info("controlAndSaveVideoRecord end deviceId={} channelId={} atonId={}", deviceId, channelId, atonId);
     }
 
-    private CheckResult extractVideoFrame(String taskResultId) {
+    private UrlParam extractVideoFrame(String taskResultId) {
         List<String> records = null;
         records = cloudRecordServiceMapper.queryRecordFilePathList(null, taskResultId, null, null, null, null);
         log.info("queryRecordFilePathList taskResultId={} records={}", taskResultId, records);
@@ -241,10 +241,10 @@ public class ScheduleService implements IScheduleService {
         }
         log.info("extractVideoFrame end taskResultId={} screenshots={}", taskResultId, screenshots);
 
-        CheckResult checkResult = new CheckResult();
-        checkResult.setImgsUrl(String.join(";", screenshots));
-        checkResult.setVideoUrl(videoPath);
-        return screenshots;
+        UrlParam urlParam = new UrlParam();
+        urlParam.setImgsUrl(String.join(";", screenshots));
+        urlParam.setVideoUrl(videoPath);
+        return urlParam;
     }
 
     private void execCheckDerivativeTask(CheckSchedule checkSchedule) {
@@ -350,16 +350,16 @@ public class ScheduleService implements IScheduleService {
             throw new RuntimeException(e);
         }
         Long resultId = Long.valueOf(event.getStream().split("-")[1]);
-        CheckResult checkResult = extractVideoFrame(event.getStream());
-        log.info("scheduleExecutor MediaRecordMp4Event: checkResult={}", checkResult);
-        if (checkResult!= null &&
-                StringUtils.isNotBlank(checkResult.getImgsUrl())) {
-
+        UrlParam urlParam = extractVideoFrame(event.getStream());
+        log.info("scheduleExecutor MediaRecordMp4Event: checkResult={}", urlParam);
+        if (urlParam != null &&
+                StringUtils.isNotBlank(urlParam.getImgsUrl())) {
             CheckResult checkResult = checkResultMapper.get(resultId).get(0);
             CheckDerivativeTask checkDerivativeTask = checkDerivativeTaskMapper.get(checkResult.getCheckTaskId()).get(0);
             CheckSchedule checkSchedule = checkScheduleMapper.get(checkDerivativeTask.getCheckScheduleId()).get(0);
             Aton at = atonMapper.get(checkResult.getAtonId()).get(0);
             checkResultMapper.updateStatus(resultId, 3);
+            List<String> screenshots = Arrays.asList(urlParam.getImgsUrl().split(";"));
             if (checkSchedule.getCheckColor() == 1) {
                 execCheckColorTask(at, screenshots);
             }
@@ -369,7 +369,7 @@ public class ScheduleService implements IScheduleService {
             if (checkSchedule.getCheckLight() == 1) {
                 execCheckLightTask(at, screenshots);
             }
-            checkResultMapper.updateStatusTime(resultId, 4, new Timestamp(System.currentTimeMillis()));
+            checkResultMapper.updateStatusTimeUrl(resultId, 4, new Timestamp(System.currentTimeMillis()), urlParam.getVideoUrl(), urlParam.getImgsUrl());
             checkDerivativeTaskMapper.incrementCompleteNum(checkDerivativeTask.getId());
         }
 

@@ -60,12 +60,11 @@
           </el-table-column>
           <el-table-column prop="atonId" label="航标id" min-width="100"></el-table-column>
 
-          <!--          <el-table-column label="操作" min-width="200" fixed="right">-->
-          <!--            <template slot-scope="scope">-->
-          <!--              <el-button size="mini" @click="openEditDialog(scope.row)">编辑</el-button>-->
-          <!--              <el-button size="mini" type="danger" @click="deleteSchedule(scope.row)">删除</el-button>-->
-          <!--            </template>-->
-          <!--          </el-table-column>-->
+          <el-table-column label="操作" min-width="200" fixed="right">
+            <template slot-scope="scope">
+              <el-button size="mini" @click="play(scope.row)">播放</el-button>
+            </template>
+          </el-table-column>
         </el-table>
         <el-pagination
           style="text-align: right"
@@ -79,7 +78,12 @@
         </el-pagination>
       </el-main>
     </el-container>
-
+    <el-dialog
+      :title="playerTitle"
+      :visible.sync="showPlayer"
+      width="50%">
+      <easyPlayer ref="recordVideoPlayer" :videoUrl="videoUrl" :height="false"  ></easyPlayer>
+    </el-dialog>
     <!-- 新增/编辑计划弹窗 -->
     <!--    <el-dialog :title="isEdit ? '编辑计划' : '新增计划'" :visible.sync="dialogVisible" width="500px">-->
     <!--      <el-form ref="scheduleForm" :model="currentSchedule" :rules="rules" label-width="100px">-->
@@ -144,10 +148,17 @@
 </template>
 
 <script>
+import easyPlayer from "./common/easyPlayer.vue";
+
 export default {
   name: 'checkResult',
+  components: {easyPlayer},
   data() {
     return {
+      chooseRecord: null, // 媒体服务
+      showPlayer: false,
+      videoUrl: '',
+      playerTitle: '',
       scheduleList: [],
       searchSrt: null,
       winHeight: window.innerHeight - 200,
@@ -201,7 +212,34 @@ export default {
       ],
     };
   },
+  destroyed() {
+    this.$destroy('recordVideoPlayer');
+  },
   methods: {
+    play(row) {
+      console.log(row)
+      this.showPlayer = true;
+      this.$axios({
+        method: 'get',
+        url: `/api/cloud/record/taskPlay/path`,
+        params: {
+          recordId: row.id,
+        }
+      }).then((res) => {
+        console.log(res)
+        if (res.data.code === 0) {
+          if (location.protocol === "https:") {
+            this.videoUrl = res.data.data.httpsPath;
+          }else {
+            this.videoUrl = res.data.data.httpPath;
+          }
+          console.log(222 )
+          console.log(this.videoUrl )
+        }
+      }).catch((error) => {
+        console.log(error);
+      });
+    },
     initData() {
       this.getScheduleList();
     },

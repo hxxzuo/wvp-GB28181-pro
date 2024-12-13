@@ -64,10 +64,10 @@ public interface CheckResultMapper {
 
     @Update(value = {" <script>" +
             "UPDATE check_result " +
-            "SET  status=#{status}, endTime=#{endTime}" +
+            "SET  status=#{status}, endTime=#{endTime}, video_url=#{videoUrl}, imgs_url={imgsUrl}" +
             " WHERE id=#{id}" +
             " </script>"})
-    void updateStatusTime(Long id, Integer status, Timestamp endTime);
+    void updateStatusTimeUrl(Long id, Integer status, Timestamp endTime,String videoUrl,String imgsUrl);
 
     @Select(" <script>" +
             "SELECT " +

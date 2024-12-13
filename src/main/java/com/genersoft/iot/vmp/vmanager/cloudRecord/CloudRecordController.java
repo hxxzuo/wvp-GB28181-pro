@@ -223,6 +223,14 @@ public class CloudRecordController {
         return cloudRecordService.getPlayUrlPath(recordId);
     }
 
+    @ResponseBody
+    @GetMapping("/taskPlay/path")
+    @Operation(summary = "获取播放地址")
+    @Parameter(name = "streamId", description = "录像记录的ID", required = true)
+    public DownloadFileInfo getTaskPlayUrlPath(@RequestParam(required = true) String streamId) {
+        return cloudRecordService.getTaskPlayUrlPath(streamId);
+    }
+
     /************************* 以下这些接口只适合wvp和zlm部署在同一台服务器的情况，且wvp只有一个zlm节点的情况 ***************************************/
 
     /**
