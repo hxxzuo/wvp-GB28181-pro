@@ -82,7 +82,7 @@
       :title="playerTitle"
       :visible.sync="showPlayer"
       width="50%">
-      <easyPlayer ref="recordVideoPlayer" :videoUrl="videoUrl" :height="false"  ></easyPlayer>
+      <easyPlayer ref="recordVideoPlayer" :videoUrl="videoUrl" :height="false"></easyPlayer>
     </el-dialog>
     <!-- 新增/编辑计划弹窗 -->
     <!--    <el-dialog :title="isEdit ? '编辑计划' : '新增计划'" :visible.sync="dialogVisible" width="500px">-->
@@ -203,12 +203,12 @@ export default {
         ],
       },
       adminOptions: [
-        { value: '广州航标管理站', label: '广州航标管理站' },
-        { value: '盐田航标管理站', label: '盐田航标管理站' },
-        { value: '蛇口航标管理站', label: '蛇口航标管理站' },
-        { value: '南沙航标管理站', label: '南沙航标管理站' },
-        { value: '江门航标管理站', label: '江门航标管理站' },
-        { value: '阳江航标管理站', label: '阳江航标管理站' },
+        {value: '广州航标管理站', label: '广州航标管理站'},
+        {value: '盐田航标管理站', label: '盐田航标管理站'},
+        {value: '蛇口航标管理站', label: '蛇口航标管理站'},
+        {value: '南沙航标管理站', label: '南沙航标管理站'},
+        {value: '江门航标管理站', label: '江门航标管理站'},
+        {value: '阳江航标管理站', label: '阳江航标管理站'},
       ],
     };
   },
@@ -223,18 +223,18 @@ export default {
         method: 'get',
         url: `/api/cloud/record/taskPlay/path`,
         params: {
-          recordId: row.id,
+          streamId: 'taskResultId-' + row.id,
         }
       }).then((res) => {
         console.log(res)
         if (res.data.code === 0) {
           if (location.protocol === "https:") {
             this.videoUrl = res.data.data.httpsPath;
-          }else {
+          } else {
             this.videoUrl = res.data.data.httpPath;
           }
-          console.log(222 )
-          console.log(this.videoUrl )
+          console.log(222)
+          console.log(this.videoUrl)
         }
       }).catch((error) => {
         console.log(error);
