@@ -493,7 +493,6 @@ public class PlayServiceImpl implements IPlayService {
             return;
         }
 
-
         sendRtpInfo.setOnlyAudio(true);
         sendRtpInfo.setPt(8);
         sendRtpInfo.setStatus(1);
@@ -522,8 +521,15 @@ public class PlayServiceImpl implements IPlayService {
         }, userSetting.getPlayTimeout());
 
         try {
-            mediaServerService.startSendRtpPassive(mediaServerItem, sendRtpInfo, userSetting.getPlayTimeout() * 1000);
-        } catch (ControllerException e) {
+            Integer localPort = mediaServerService.startSendRtpPassive(mediaServerItem, sendRtpInfo, userSetting.getPlayTimeout() * 1000);
+            if (localPort == null || localPort <= 0) {
+                timeoutCallback.run();
+                mediaServerService.releaseSsrc(mediaServerItem.getId(), sendRtpInfo.getSsrc());
+                sessionManager.removeByStream(sendRtpInfo.getStream());
+                return;
+            }
+            sendRtpInfo.setPort(localPort);
+        }catch (ControllerException e) {
             mediaServerService.releaseSsrc(mediaServerItem.getId(), sendRtpInfo.getSsrc());
             log.info("[语音对讲]失败 deviceId: {}, channelId: {}", device.getDeviceId(), channel.getDeviceId());
             audioEvent.call("失败, " + e.getMessage());
@@ -619,9 +625,6 @@ public class PlayServiceImpl implements IPlayService {
                     break;
                 }
             }
-//            if (sdp.getConnection().getAddress().equals("10.10.1.250")){
-//                sdp.getConnection().setAddress("36.141.37.130");
-//            }
             log.info("[TCP主动连接对方] deviceId: {}, channelId: {}, 连接对方的地址：{}:{}, 收流模式：{}, SSRC: {}, SSRC校验：{}", device.getDeviceId(), channel.getDeviceId(), sdp.getConnection().getAddress(), port, device.getStreamMode(), ssrcInfo.getSsrc(), device.isSsrcCheck());
             Boolean result = mediaServerService.connectRtpServer(mediaServerItem, sdp.getConnection().getAddress(), port, ssrcInfo.getStream());
             log.info("[TCP主动连接对方] 结果： {}", result);
