@@ -266,7 +266,7 @@ public class ScheduleService implements IScheduleService {
         String[] c = administrators.split(",");
 
         Arrays.stream(c).forEach(admin -> {
-            List<Aton> atons = atonMapper.queryAtonList(null, null, admin);
+            List<Aton> atons = atonMapper.queryAtonList(null, null, admin, null);
             if (CollectionUtils.isEmpty(atons)) {
                 return;
             }

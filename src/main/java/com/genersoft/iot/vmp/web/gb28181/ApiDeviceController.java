@@ -257,7 +257,7 @@ public class ApiDeviceController {
 
     @PostMapping(value = "/atonlist")
     public PageInfo<Aton> atonlist(@RequestBody AtonQueryParam param) {
-        PageInfo<Aton> atons = atonService.queryAton(param.getPage(), param.getCount(), param.getName(), param.getType());
+        PageInfo<Aton> atons = atonService.queryAton(param.getPage(), param.getCount(), param.getName(), param.getType(),param.getAdminister());
         return atons;
     }
 

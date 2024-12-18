@@ -6,7 +6,7 @@ import com.github.pagehelper.PageInfo;
 
 public interface IAtonService {
 
-    PageInfo<Aton>  queryAton(int page, int count, String name,String type);
+    PageInfo<Aton>  queryAton(int page, int count, String name,String type,String administer);
 
     PageInfo<DeviceChannel>  checkAtonCameraList(int page, int count, String name, Integer radius);
 

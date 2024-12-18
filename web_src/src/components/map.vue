@@ -243,6 +243,7 @@ export default {
         data: {
           page: 1,
           count: 1500,
+          administer: '广州航标处'
         }
       }).then((res) => {
         console.log(res)

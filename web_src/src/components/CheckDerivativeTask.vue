@@ -27,12 +27,12 @@
           <el-table-column prop="checkScheduleId" label="计划id" min-width="100"></el-table-column>
           <el-table-column prop="startTime" label="开始时间" min-width="100">
             <template slot-scope="scope">
-              <span>{{ scope.row.startTime }}</span>
+              <span>{{ formatTimeStamp(scope.row.startTime) }}</span>
             </template>
           </el-table-column>
           <el-table-column prop="endTime" label="结束时间" min-width="100">
             <template slot-scope="scope">
-              <span>{{ scope.row.endTime }}</span>
+              <span>{{ formatTimeStamp(scope.row.endTime) }})</span>
             </template>
           </el-table-column>
           <el-table-column prop="status" label="状态" min-width="100">
@@ -129,6 +129,8 @@
 </template>
 
 <script>
+import moment from "moment";
+
 export default {
   name: 'checkDerivativeTask',
   data() {
@@ -187,6 +189,7 @@ export default {
     };
   },
   methods: {
+
     initData() {
       this.getScheduleList();
     },
@@ -234,6 +237,9 @@ export default {
       this.initParam();
       this.initData();
     },
+    formatTimeStamp(time) {
+      return moment(time).format('yyyy-MM-DD HH:mm:ss')
+    }
   },
   mounted() {
     this.initData();

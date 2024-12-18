@@ -28,7 +28,7 @@ public class AtonServiceImpl implements IAtonService {
 
 
     @Override
-    public PageInfo<Aton> queryAton(int page, int count, String name, String type) {
+    public PageInfo<Aton> queryAton(int page, int count, String name, String type,String administer) {
         PageHelper.startPage(page, count);
         if (StringUtils.isBlank(name)) {
             name = null;
@@ -36,7 +36,7 @@ public class AtonServiceImpl implements IAtonService {
         if (StringUtils.isBlank(type)) {
             type = null;
         }
-        List<Aton> all = atonMapper.queryAtonList(name, type,null);
+        List<Aton> all = atonMapper.queryAtonList(name, type,null,administer);
         all.forEach(aton -> {
             double[] p = GpsUtil.wgs84ToGcj02(aton.getLongitude(), aton.getLatitude());
             aton.setLongitude(p[0]);
@@ -47,7 +47,7 @@ public class AtonServiceImpl implements IAtonService {
 
     @Override
     public PageInfo<DeviceChannel> checkAtonCameraList(int page, int count, String name, Integer radius) {
-        List<Aton> all = atonMapper.queryAtonList(name, null,null);
+        List<Aton> all = atonMapper.queryAtonList(name, null,null,null);
         if (CollectionUtils.isEmpty(all)) {
             return new PageInfo<>();
         }

@@ -118,7 +118,10 @@ export default {
           const [lon, lat] = toLonLat(olMap.getEventCoordinate(event.originalEvent));
           this.mouseCoordinates = { lon, lat };
         });
-
+        olMap.on('moveend', function(evt) {
+          let resolution = olMap.getView().getResolution();
+          console.log("当前分辨率:", resolution);
+        });
         // olMap.on('moveend', () => {
         //   const zoomLevel = olMap.getView().getZoom(); // 获取当前缩放级别
         //     parentData.setStyle((style) => {
@@ -258,6 +261,8 @@ export default {
                 font: data[i].label.font || '12px Arial',
                 // fill: new Fill({ color: data[i].label.fill || 'black' }),
                 stroke: new Stroke({ color: data[i].label.stroke || 'white', width: data[i].label.strokeWidth || 2 }),
+                minResolution: 35, // 当分辨率小于等于 10 时显示标注
+                // maxResolution: 36, // 可选：当分辨率大于等于 100 时隐藏标注
               });
               featureStyle = new Style({
                 image: iconStyle, text: textStyle,

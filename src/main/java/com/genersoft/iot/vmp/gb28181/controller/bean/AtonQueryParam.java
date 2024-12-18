@@ -9,4 +9,5 @@ public class AtonQueryParam {
     private int count;
     private String name;
     private String type;
+    private String administer;
 }

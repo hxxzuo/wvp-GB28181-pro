@@ -143,6 +143,8 @@
 </template>
 
 <script>
+import moment from "moment/moment";
+
 export default {
   name: 'checkSchedule',
   data() {
@@ -331,7 +333,8 @@ export default {
         checkColor: 0,
         checkStructure: 0
       };
-    },
+    }
+
   },
   mounted() {
     this.initData();
