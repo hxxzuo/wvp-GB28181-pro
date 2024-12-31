@@ -58,13 +58,13 @@
             </el-button-group>
 
             <el-button-group >
-              <el-button size="mini" class="iconfont icon-zanting" title="开始" @click="gbPause()"></el-button>
-              <el-button size="mini" class="iconfont icon-kaishi" title="暂停" @click="gbPlay()"></el-button>
+              <el-button size="mini" class="iconfont icon-zanting" title="暂停" @click="gbPause()"></el-button>
+              <el-button size="mini" class="iconfont icon-kaishi" title="开始" @click="gbPlay()"></el-button>
               <el-dropdown size="mini" title="播放倍速"  @command="gbScale">
                 <el-button size="mini">
                   倍速 <i class="el-icon-arrow-down el-icon--right"></i>
                 </el-button>
-                <el-dropdown-menu  slot="dropdown">
+                <el-dropdown-menu>
                   <el-dropdown-item command="0.25">0.25倍速</el-dropdown-item>
                   <el-dropdown-item command="0.5">0.5倍速</el-dropdown-item>
                   <el-dropdown-item command="1.0">1倍速</el-dropdown-item>
