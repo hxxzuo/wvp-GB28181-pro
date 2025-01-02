@@ -210,18 +210,18 @@
                 </div>
               </div>
               <div style="text-align: left" >
-                <el-select
+                <el-tabs
                   v-model="ptzMethod"
                   style="width: 100%"
                   size="mini"
                   placeholder="请选择云台功能"
                 >
-                  <el-option label="预置点" value="preset"></el-option>
-                  <el-option label="巡航组" value="cruise"></el-option>
-                  <el-option label="自动扫描" value="scan"></el-option>
-                  <el-option label="雨刷" value="wiper"></el-option>
-                  <el-option label="辅助开关" value="switch"></el-option>
-                </el-select>
+                  <el-tab-pane label="预置点" name="preset"></el-tab-pane>
+                  <el-tab-pane label="巡航组" name="cruise"></el-tab-pane>
+                  <el-tab-pane label="自动扫描" name="scan"></el-tab-pane>
+                  <el-tab-pane label="雨刷" name="wiper"></el-tab-pane>
+                  <el-tab-pane label="辅助开关" name="switch"></el-tab-pane>
+                </el-tabs>
 
                 <ptzPreset :channelDeviceId="channelId" :deviceId="deviceId" v-if="ptzMethod === 'preset'" style="margin-top: 1rem"></ptzPreset>
                 <ptzCruising :channelDeviceId="channelId" :deviceId="deviceId" v-if="ptzMethod === 'cruise'" style="margin-top: 1rem"></ptzCruising>
@@ -288,7 +288,6 @@ export default {
     }
   },
   created() {
-    console.log("created")
     console.log(this.player)
     this.broadcastStatus = -1;
     if (Object.keys(this.player).length === 1) {

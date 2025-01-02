@@ -61,6 +61,20 @@
           <el-descriptions-item label="所属单位">{{ aton["belong"] }}</el-descriptions-item>
           <el-descriptions-item label="水域">{{ aton["waters"] }}</el-descriptions-item>
         </el-descriptions>
+        <div style="padding-top: 10px">
+          <el-button
+            type="primary"
+            size="small"
+            title="查看照片"
+            icon="el-icon-picture"
+            @mouseenter.native="showImage(aton)"
+          >
+            查看照片
+          </el-button>
+        </div>
+        <div v-if="imageVisible" class="image-preview">
+          <img :src="imageUrl" alt="图像预览" />
+        </div>
         <span class="infobox-close el-icon-close" @click="closeAtonInfoBox()"></span>
       </div>
     </div>
@@ -107,7 +121,8 @@ export default {
       isLoging: false,
       longitudeStr: "gbLongitude",
       latitudeStr: "gbLatitude",
-
+      imageVisible: false, // 控制图像显示
+      imageUrl: '',
       ptzTypeMapping: {
         1: '球机',
         2: '半球',
@@ -144,6 +159,11 @@ export default {
 
   },
   methods: {
+    showImage: function (aton) {
+      // console.log('showImage:'+aton.image)
+      this.imageUrl = aton.image;
+      this.imageVisible = true;
+    },
     clickEvent: function (channelId) {
       this.$axios({
         method: 'get',
@@ -436,16 +456,16 @@ export default {
       return src;
     },
     getImageByAton: function (aton) {
-      let src = "static/images/gis/camera.png"
+      let src = ""
       switch (aton.type) {
-        case 1:
-            src = "static/images/gis/camera1-offline.png"
+        case 'AIS基站':
+            src = "static/images/aton/ais.ico"
           break;
-        case 2:
-            src = "static/images/gis/camera2-offline.png"
+        case '灯桩':
+            src = "static/images/aton/灯桩.ico"
           break;
-        case 3:
-            src = "static/images/gis/camera3-offline.png"
+        case '桥梁标志':
+            src = "static/images/aton/桥梁标志.ico"
           break;
         default:
             src = "static/images/aton/1.ico"
@@ -481,6 +501,8 @@ export default {
       }
     },
     closeAtonInfoBox: function () {
+      this.imageVisible = false
+      this.imageUrl = ''
       if (this.atonInfoBoxId != null) {
         this.$refs.map.closeInfoBox(this.atonInfoBoxId)
       }
@@ -596,5 +618,17 @@ export default {
   padding: 20px 20px 0px 23px;
   text-align: center;
   width: 100%;
+}
+
+.image-preview img {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #ccc;
+  margin-top: 10px;
+  position: absolute;
+  z-index: 1000;
+  left: 300px;
+  top: -20px;
+  display: block;
 }
 </style>
