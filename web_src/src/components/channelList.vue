@@ -307,7 +307,7 @@ export default {
         method: 'get',
         url: '/api/play/start/' + deviceId + '/' + channelId,
         params: {
-          isSubStream: this.isSubStream
+          // isSubStream: this.isSubStream
         }
       }).then(function (res) {
         console.log(res)
@@ -419,7 +419,7 @@ export default {
         method: 'get',
         url: '/api/play/stop/' + this.deviceId + "/" + itemData.deviceId,
         params: {
-          isSubStream: this.isSubStream
+          // isSubStream: this.isSubStream
         }
       }).then(function (res) {
         that.initData();

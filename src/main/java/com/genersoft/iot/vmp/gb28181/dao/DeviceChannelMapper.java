@@ -674,9 +674,6 @@ public interface DeviceChannelMapper {
 
     public final static String BASE_SQL = "select\n" +
             "    id as gb_id,\n" +
-            "    device_db_id as gb_device_db_id,\n" +
-            "    stream_push_id,\n" +
-            "    stream_proxy_id,\n" +
             "    create_time,\n" +
             "    update_time,\n" +
             "    coalesce(gb_device_id, device_id) as gb_device_id,\n" +

@@ -167,6 +167,11 @@ export default new VueRouter({
           name: 'checkResult',
           component: checkResult,
         },
+        // {
+        //   path: '/faultStatistics',
+        //   name: 'faultStatistics',
+        //   component: faultStatistics,
+        // },
         ]
     },
     {

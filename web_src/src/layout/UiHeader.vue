@@ -26,8 +26,12 @@
         <el-menu-item index="/checkDerivativeTaskList">派生任务</el-menu-item>
         <el-menu-item index="/checkResultList">巡视结果</el-menu-item>
       </el-submenu>
-      <el-menu-item index="/cloudRecord">云端录像</el-menu-item>
-      <el-menu-item index="/recordPlan">录制计划</el-menu-item>
+      <el-submenu index="/record">
+        <template slot="title">视频录像</template>
+        <el-menu-item index="/cloudRecord">云端录像</el-menu-item>
+        <el-menu-item index="/recordPlan">录制计划</el-menu-item>
+      </el-submenu>
+<!--      <el-menu-item index="/faultStatistics">故障统计</el-menu-item>-->
       <el-submenu index="/setting">
         <template slot="title">系统设置</template>
         <el-menu-item v-if="editUser" index="/userManager">用户管理</el-menu-item>

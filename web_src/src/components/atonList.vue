@@ -302,8 +302,8 @@ export default {
     },
     play: function (channel) {
       console.info("play: " + JSON.stringify(channel))
-      let deviceId = channel.parentId;
-      let channelId = channel.deviceId;
+      let deviceId = channel.gbParentId;
+      let channelId = channel.gbDeviceId;
       console.log("通知设备推流1：" + deviceId + " : " + channelId);
       let that = this;
       this.$axios({

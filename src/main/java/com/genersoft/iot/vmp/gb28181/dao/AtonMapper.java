@@ -54,4 +54,25 @@ public interface AtonMapper {
             " </script>")
     List<Aton> get(@Param("id") Long id);
 
+    @Select("<script>" +
+            "SELECT " +
+            "id, " +
+            "name, " +
+            "longitude, " +
+            "latitude, " +
+            "type, " +
+            "address, " +
+            "attribute," +
+            "administer," +
+            "maintenance," +
+            "belong," +
+            "waters," +
+            "image " +
+            "FROM aton de " +
+            "WHERE de.id IN " +
+            "<foreach item='id' index='index' collection='ids' open='(' separator=',' close=')'> " +
+            "#{id} " +
+            "</foreach> " +
+            "</script>")
+    List<Aton> selectByIds(@Param("ids") List<Long> ids);
 }

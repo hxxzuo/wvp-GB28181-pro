@@ -8,7 +8,7 @@
             size="mini"
             style="margin-right: 1rem; cursor: pointer; margin-bottom: 0.6rem"
     >
-      {{item.presetName?item.presetName:item.presetId}}
+      {{ item.presetName ? item.presetName : item.presetId }}
     </el-tag>
     <el-input
       min="1"
@@ -23,8 +23,8 @@
       size="small"
     >
       <template v-slot:append>
-        <el-button  @click="addPreset()">保存</el-button>
-        <el-button  @click="cancel()">取消</el-button>
+        <el-button @click="addPreset()">保存</el-button>
+        <el-button @click="cancel()">取消</el-button>
       </template>
     </el-input>
     <el-button v-else size="small" @click="showInput">+ 添加</el-button>
@@ -35,7 +35,7 @@
 
 export default {
   name: "ptzPreset",
-  props: [ 'channelDeviceId', 'deviceId'],
+  props: ['channelDeviceId', 'deviceId'],
   components: {},
   created() {
     this.getPresetList()
@@ -52,16 +52,40 @@ export default {
       this.$axios({
         method: 'get',
         url: `/api/front-end/preset/query/${this.deviceId}/${this.channelDeviceId}`,
-      }).then((res)=> {
+      }).then((res) => {
         if (res.data.code === 0) {
           this.presetList = res.data.data;
+          this.$axios({
+            method: 'post',
+            url: `/api/v1/device/checkAtonPresetLocationList`,
+            data: {
+              deviceId: this.deviceId,
+              channelId: this.channelDeviceId,
+            },
+          }).then((res) => {
+            const nameMap = new Map();
+            res.data.forEach(item => {
+              nameMap.set(String(item['presetLocationId']), item['name']);
+            });
+            // for (let [key, value] of nameMap) {
+            //   console.log(`Key: ${key}, Value: ${value}`);
+            // }
+            this.presetList = this.presetList.map(preset => {
+              const name = nameMap.get(preset.presetId);
+              if (name !== undefined) {
+                return {...preset, presetName: preset.presetId + '_' + name};
+              }
+              return preset;
+            });
+            // console.log('this.presetList:'+JSON.stringify(this.presetList))
+          })
+
           // 防止出现表格错位
           this.$nextTick(() => {
             this.$refs.channelListTable.doLayout();
           })
         }
-
-      }).catch((error)=> {
+      }).catch((error) => {
 
         console.log(error);
       });
@@ -72,7 +96,7 @@ export default {
         this.$refs.saveTagInput.$refs.input.focus();
       });
     },
-    addPreset: function (){
+    addPreset: function () {
       const loading = this.$loading({
         lock: true,
         fullscreen: true,
@@ -86,15 +110,15 @@ export default {
         params: {
           presetId: this.ptzPresetId
         }
-      }).then((res)=> {
+      }).then((res) => {
         if (res.data.code === 0) {
-          setTimeout(()=>{
+          setTimeout(() => {
             loading.close()
             this.inputVisible = false;
             this.ptzPresetId = ""
             this.getPresetList()
           }, 1000)
-        }else {
+        } else {
           loading.close()
           this.inputVisible = false;
           this.ptzPresetId = ""
@@ -104,7 +128,7 @@ export default {
             type: 'error'
           });
         }
-      }).catch((error)=> {
+      }).catch((error) => {
         loading.close()
         this.inputVisible = false;
         this.ptzPresetId = ""
@@ -119,7 +143,7 @@ export default {
       this.inputVisible = false;
       this.ptzPresetId = ""
     },
-    gotoPreset: function (preset){
+    gotoPreset: function (preset) {
       console.log(preset)
       this.$axios({
         method: 'get',
@@ -127,21 +151,21 @@ export default {
         params: {
           presetId: preset.presetId
         }
-      }).then((res)=> {
+      }).then((res) => {
         if (res.data.code === 0) {
           this.$message({
             showClose: true,
             message: '调用成功',
             type: 'success'
           });
-        }else {
+        } else {
           this.$message({
             showClose: true,
             message: res.data.msg,
             type: 'error'
           });
         }
-      }).catch((error)=> {
+      }).catch((error) => {
         this.$message({
           showClose: true,
           message: error,
@@ -149,7 +173,7 @@ export default {
         });
       });
     },
-    delPreset: function (preset){
+    delPreset: function (preset) {
       this.$confirm("确定删除此预置位", '提示', {
         dangerouslyUseHTMLString: true,
         confirmButtonText: '确定',
@@ -169,13 +193,13 @@ export default {
           params: {
             presetId: preset.presetId
           }
-        }).then((res)=> {
+        }).then((res) => {
           if (res.data.code === 0) {
-            setTimeout(()=>{
+            setTimeout(() => {
               loading.close()
               this.getPresetList()
             }, 1000)
-          }else {
+          } else {
             loading.close()
             this.$message({
               showClose: true,
@@ -184,7 +208,7 @@ export default {
             });
           }
 
-        }).catch((error)=> {
+        }).catch((error) => {
           loading.close()
           this.$message({
             showClose: true,

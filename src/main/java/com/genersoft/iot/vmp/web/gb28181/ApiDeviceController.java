@@ -220,8 +220,8 @@ public class ApiDeviceController {
             return result;
         }
 
-        deferredResultEx.setFilter(filterResult->{
-            List<Preset> presetQuerySipReqList = (List<Preset>)filterResult;
+        deferredResultEx.setFilter(filterResult -> {
+            List<Preset> presetQuerySipReqList = (List<Preset>) filterResult;
             HashMap<String, Object> resultMap = new HashMap<>();
             resultMap.put("DeviceID", code);
             resultMap.put("Result", "OK");
@@ -257,13 +257,13 @@ public class ApiDeviceController {
 
     @PostMapping(value = "/atonlist")
     public PageInfo<Aton> atonlist(@RequestBody AtonQueryParam param) {
-        PageInfo<Aton> atons = atonService.queryAton(param.getPage(), param.getCount(), param.getName(), param.getType(),param.getAdminister());
+        PageInfo<Aton> atons = atonService.queryAton(param.getPage(), param.getCount(), param.getName(), param.getType(), param.getAdminister());
         return atons;
     }
 
     @PostMapping(value = "/checkatoncameralist")
     public PageInfo<DeviceChannel> checkAtonCameraList(@RequestBody AtonCameraListParam param) {
-        PageInfo<DeviceChannel> deviceChannels = atonService.checkAtonCameraList(1, 10, param.getName(), param.getRadius());
+        PageInfo<DeviceChannel> deviceChannels = atonService.checkAtonCameraList(1, 1000, param.getName(), param.getRadius());
         deviceChannels.getList().forEach(deviceChannel -> {
             AtonPresetLocation atonPresetLocation = scheduleService.getAtonPresetLocation(param.getAtonId(), deviceChannel.getGbParentId(), deviceChannel.getGbDeviceId());
             if (atonPresetLocation != null) {
@@ -272,6 +272,12 @@ public class ApiDeviceController {
             }
         });
         return deviceChannels;
+    }
+
+    @PostMapping(value = "/checkAtonPresetLocationList")
+    public List<AtonPresetCamera> checkAtonPresetLocationList(@RequestBody AtonCameraListParam param) {
+        List<AtonPresetCamera> atonPresetCameras = atonService.queryAtonPresetCamera(param.getDeviceId(), param.getChannelId());
+        return atonPresetCameras;
     }
 
     @DeleteMapping(value = "/schedule/delete/{id}")
@@ -322,8 +328,8 @@ public class ApiDeviceController {
 
     @PostMapping(value = "/checkResult/list")
     public PageInfo<CheckResult> checkResultList(@RequestBody CheckResultQueryParam param) {
-        PageInfo<CheckResult> results =  scheduleService.queryCheckResult(param.getPage(), param.getCount(), param.getName());
-        log.info("results={}",results.getList());
+        PageInfo<CheckResult> results = scheduleService.queryCheckResult(param.getPage(), param.getCount(), param.getName());
+        log.info("results={}", results.getList());
         return results;
     }
 }

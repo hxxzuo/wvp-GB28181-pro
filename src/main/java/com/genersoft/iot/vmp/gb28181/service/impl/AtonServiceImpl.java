@@ -1,8 +1,11 @@
 package com.genersoft.iot.vmp.gb28181.service.impl;
 
 import com.genersoft.iot.vmp.gb28181.bean.Aton;
+import com.genersoft.iot.vmp.gb28181.bean.AtonPresetLocation;
 import com.genersoft.iot.vmp.gb28181.bean.DeviceChannel;
+import com.genersoft.iot.vmp.gb28181.controller.bean.AtonPresetCamera;
 import com.genersoft.iot.vmp.gb28181.dao.AtonMapper;
+import com.genersoft.iot.vmp.gb28181.dao.AtonPresetLocationMapper;
 import com.genersoft.iot.vmp.gb28181.dao.DeviceChannelMapper;
 import com.genersoft.iot.vmp.gb28181.service.IAtonService;
 import com.genersoft.iot.vmp.utils.GpsUtil;
@@ -15,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -25,10 +29,11 @@ public class AtonServiceImpl implements IAtonService {
     private AtonMapper atonMapper;
     @Autowired
     private DeviceChannelMapper deviceChannelMapper;
-
+    @Autowired
+    private AtonPresetLocationMapper atonPresetLocationMapper;
 
     @Override
-    public PageInfo<Aton> queryAton(int page, int count, String name, String type,String administer) {
+    public PageInfo<Aton> queryAton(int page, int count, String name, String type, String administer) {
         PageHelper.startPage(page, count);
         if (StringUtils.isBlank(name)) {
             name = null;
@@ -36,7 +41,7 @@ public class AtonServiceImpl implements IAtonService {
         if (StringUtils.isBlank(type)) {
             type = null;
         }
-        List<Aton> all = atonMapper.queryAtonList(name, type,null,administer);
+        List<Aton> all = atonMapper.queryAtonList(name, type, null, administer);
         all.forEach(aton -> {
             double[] p = GpsUtil.wgs84ToGcj02(aton.getLongitude(), aton.getLatitude());
             aton.setLongitude(p[0]);
@@ -46,8 +51,28 @@ public class AtonServiceImpl implements IAtonService {
     }
 
     @Override
+    public List<AtonPresetCamera> queryAtonPresetCamera(String deviceId, String channelId) {
+        if (StringUtils.isBlank(deviceId)) {
+            deviceId = null;
+        }
+        if (StringUtils.isBlank(channelId)) {
+            channelId = null;
+        }
+        List<AtonPresetLocation> atonPresetLocations = atonPresetLocationMapper.query(null, deviceId, channelId);
+        if (CollectionUtils.isEmpty(atonPresetLocations)) {
+            return null;
+        }
+        List<Long> atonIds = atonPresetLocations.stream().map(AtonPresetLocation::getAtonId).collect(Collectors.toList());
+        Map<Long, String> atonIdName = atonMapper.selectByIds(atonIds).stream().collect(Collectors.toMap(
+                Aton::getId, Aton::getName));
+        return atonPresetLocations.stream().map(atonPresetLocation ->
+                        new AtonPresetCamera(atonPresetLocation.getPresetLocation(), atonIdName.get(atonPresetLocation.getAtonId())))
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public PageInfo<DeviceChannel> checkAtonCameraList(int page, int count, String name, Integer radius) {
-        List<Aton> all = atonMapper.queryAtonList(name, null,null,null);
+        List<Aton> all = atonMapper.queryAtonList(name, null, null, null);
         if (CollectionUtils.isEmpty(all)) {
             return new PageInfo<>();
         }
