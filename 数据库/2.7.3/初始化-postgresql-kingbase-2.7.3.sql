@@ -31,7 +31,9 @@ create table wvp_device
     local_ip                            character varying(50),
     password                            character varying(255),
     as_message_channel                  bool    default false,
-    keepalive_interval_time             integer,
+    heart_beat_interval                 integer,
+    heart_beat_count                    integer,
+    position_capability                 integer,
     broadcast_push_after_ack            bool    default false,
     constraint uk_device_device unique (device_id)
 );
@@ -323,6 +325,7 @@ create table wvp_stream_proxy
     update_time                character varying(50),
     stream_key                 character varying(255),
     enable_disable_none_reader bool default false,
+    relates_media_server_id    character varying(50),
     constraint uk_stream_proxy_app_stream unique (app, stream)
 );
 
@@ -352,8 +355,8 @@ create table wvp_cloud_record
     end_time        int8,
     media_server_id character varying(50),
     file_name       character varying(255),
-    folder          character varying(255),
-    file_path       character varying(255),
+    folder          character varying(500),
+    file_path       character varying(500),
     collect         bool default false,
     file_size       int8,
     time_len        int8,
@@ -450,7 +453,7 @@ create table wvp_record_plan
 create table wvp_record_plan_item
 (
     id              serial primary key,
-    start           int,
+    "start"           int,
     stop            int,
     week_day        int,
     plan_id        int,

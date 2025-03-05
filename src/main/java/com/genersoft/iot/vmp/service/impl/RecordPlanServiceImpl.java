@@ -66,7 +66,7 @@ public class RecordPlanServiceImpl implements IRecordPlanService {
             return;
         }
         // 开启点播,
-        channelPlayService.play(channel, null, ((code, msg, streamInfo) -> {
+        channelPlayService.play(channel, null, true, ((code, msg, streamInfo) -> {
             if (code == InviteErrorCode.SUCCESS.getCode() && streamInfo != null) {
                 log.info("[录像] 流离开时拉起需要录像的流, 开启成功, 通道ID: {}", channel.getGbId());
                 recordStreamMap.put(channel.getGbId(), streamInfo);
@@ -89,7 +89,8 @@ public class RecordPlanServiceImpl implements IRecordPlanService {
         if (startChannelIdList.isEmpty()) {
             // 当前没有录像任务, 如果存在旧的正在录像的就移除
             if(!recordStreamMap.isEmpty()) {
-                stopStreams(recordStreamMap.keySet(), recordStreamMap);
+                Set<Integer> recordStreamSet = new HashSet<>(recordStreamMap.keySet());
+                stopStreams(recordStreamSet, recordStreamMap);
                 recordStreamMap.clear();
             }
         }else {
@@ -110,7 +111,7 @@ public class RecordPlanServiceImpl implements IRecordPlanService {
                     // 查找是否已经开启录像, 如果没有则开启录像
                     for (CommonGBChannel channel : channelList) {
                         // 开启点播,
-                        channelPlayService.play(channel, null, ((code, msg, streamInfo) -> {
+                        channelPlayService.play(channel, null, true, ((code, msg, streamInfo) -> {
                             if (code == InviteErrorCode.SUCCESS.getCode() && streamInfo != null) {
                                 log.info("[录像] 开启成功, 通道ID: {}", channel.getGbId());
                                 recordStreamMap.put(channel.getGbId(), streamInfo);

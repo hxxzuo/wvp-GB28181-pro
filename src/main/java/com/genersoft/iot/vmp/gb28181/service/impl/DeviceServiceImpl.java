@@ -41,6 +41,7 @@ import javax.sip.SipException;
 import java.text.ParseException;
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -110,9 +111,12 @@ public class DeviceServiceImpl implements IDeviceService {
         }
         device.setUpdateTime(now);
         device.setKeepaliveTime(now);
-        if (device.getKeepaliveIntervalTime() == 0) {
-            // 默认心跳间隔60
-            device.setKeepaliveIntervalTime(60);
+        if (device.getHeartBeatCount() == null) {
+            // 读取设备配置， 获取心跳间隔和心跳超时次数， 在次之前暂时设置为默认值
+            device.setHeartBeatCount(3);
+            device.setHeartBeatInterval(60);
+            device.setPositionCapability(0);
+
         }
         if (sipTransactionInfo != null) {
             device.setSipTransactionInfo(sipTransactionInfo);
@@ -132,6 +136,7 @@ public class DeviceServiceImpl implements IDeviceService {
             redisCatchStorage.updateDevice(device);
             try {
                 commander.deviceInfoQuery(device);
+                commander.deviceConfigQuery(device, null, "BasicParam", null);
             } catch (InvalidArgumentException | SipException | ParseException e) {
                 log.error("[命令发送失败] 查询设备信息: {}", e.getMessage());
             }
@@ -178,18 +183,8 @@ public class DeviceServiceImpl implements IDeviceService {
         // 刷新过期任务
         String registerExpireTaskKey = VideoManagerConstants.REGISTER_EXPIRE_TASK_KEY_PREFIX + device.getDeviceId();
         // 如果第一次注册那么必须在60 * 3时间内收到一个心跳，否则设备离线
-        dynamicTask.startDelay(registerExpireTaskKey, ()-> offline(device.getDeviceId(), "首次注册后未能收到心跳"), device.getKeepaliveIntervalTime() * 1000 * 3);
-
-//
-//        try {
-//            cmder.alarmSubscribe(device, 600, "0", "4", "0", "2023-7-27T00:00:00", "2023-7-28T00:00:00");
-//        } catch (InvalidArgumentException e) {
-//            throw new RuntimeException(e);
-//        } catch (SipException e) {
-//            throw new RuntimeException(e);
-//        } catch (ParseException e) {
-//            throw new RuntimeException(e);
-//        }
+        dynamicTask.startDelay(registerExpireTaskKey, ()-> offline(device.getDeviceId(), "三次心跳超时"),
+                device.getHeartBeatInterval() * 1000 * device.getHeartBeatCount());
 
     }
 
@@ -198,8 +193,11 @@ public class DeviceServiceImpl implements IDeviceService {
         log.warn("[设备离线]，{}, device：{}", reason, deviceId);
         Device device = getDeviceByDeviceIdFromDb(deviceId);
         if (device == null) {
+            log.warn("[设备不存在] device：{}", deviceId);
             return;
         }
+        log.info("[设备离线] device：{}， 心跳间隔： {}，心跳超时次数： {}， 上次心跳时间：{}， 上次注册时间： {}", deviceId,
+                device.getHeartBeatInterval(), device.getHeartBeatCount(), device.getKeepaliveTime(), device.getRegisterTime());
         String registerExpireTaskKey = VideoManagerConstants.REGISTER_EXPIRE_TASK_KEY_PREFIX + deviceId;
         dynamicTask.stop(registerExpireTaskKey);
         if (device.isOnLine()) {
@@ -440,7 +438,7 @@ public class DeviceServiceImpl implements IDeviceService {
         device.setCreateTime(DateUtil.getNow());
         device.setUpdateTime(DateUtil.getNow());
         if(device.getStreamMode() == null) {
-            device.setStreamMode("UDP");
+            device.setStreamMode("TCP-PASSIVE");
         }
         deviceMapper.addCustomDevice(device);
     }
@@ -583,6 +581,26 @@ public class DeviceServiceImpl implements IDeviceService {
             // 因为是异步执行，需要在这里更新下数据
             deviceMapper.updateSubscribeMobilePosition(device);
             redisCatchStorage.updateDevice(device);
+        }
+    }
+
+    @Override
+    public void updateDeviceHeartInfo(Device device) {
+        Device deviceInDb = deviceMapper.query(device.getId());
+        if (deviceInDb == null) {
+            return;
+        }
+        if (!Objects.equals(deviceInDb.getHeartBeatCount(), device.getHeartBeatCount())
+                || !Objects.equals(deviceInDb.getHeartBeatInterval(), device.getHeartBeatInterval())) {
+            // 刷新过期任务
+            String registerExpireTaskKey = VideoManagerConstants.REGISTER_EXPIRE_TASK_KEY_PREFIX + device.getDeviceId();
+            // 如果第一次注册那么必须在60 * 3时间内收到一个心跳，否则设备离线
+            dynamicTask.startDelay(registerExpireTaskKey, ()-> offline(device.getDeviceId(), "三次心跳超时"),
+                    device.getHeartBeatInterval() * 1000 * device.getHeartBeatCount());
+            deviceInDb.setHeartBeatCount(device.getHeartBeatCount());
+            deviceInDb.setHeartBeatInterval(device.getHeartBeatInterval());
+            deviceInDb.setPositionCapability(device.getPositionCapability());
+            updateDevice(deviceInDb);
         }
     }
 }

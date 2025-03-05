@@ -22,7 +22,7 @@
       </div>
     </div>
     <!--设备列表-->
-    <el-table size="medium" :data="deviceList" style="width: 100%;font-size: 12px;" :height="winHeight" header-row-class-name="table-header">
+    <el-table size="medium" :data="deviceList" style="width: 100%;font-size: 12px;" :height="$tableHeght" header-row-class-name="table-header">
       <el-table-column prop="name" label="名称" min-width="160">
       </el-table-column>
       <el-table-column prop="deviceId" label="设备编号" min-width="160" >
@@ -95,6 +95,8 @@
                 布防</el-dropdown-item>
               <el-dropdown-item command="resetGuard" v-bind:disabled="!scope.row.onLine">
                 撤防</el-dropdown-item>
+              <el-dropdown-item command="syncBasicParam" v-bind:disabled="!scope.row.onLine">
+                基础配置同步</el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
         </template>
@@ -139,7 +141,6 @@ export default {
       videoComponentList: [],
       updateLooper: 0, //数据刷新轮训标志
       currentDeviceChannelsLenth: 0,
-      winHeight: window.innerHeight - 200,
       currentPage: 1,
       count: 15,
       total: 0,
@@ -355,6 +356,8 @@ export default {
         this.resetGuard(itemData)
       }else if (command === "delete") {
         this.deleteDevice(itemData)
+      }else if (command === "syncBasicParam") {
+        this.syncBasicParam(itemData)
       }
     },
     setGuard: function (itemData) {
@@ -449,6 +452,33 @@ export default {
           this.$message.success({
             showClose: true,
             message: value?"订阅成功":"取消订阅成功"
+          })
+        }else {
+          this.$message.error({
+            showClose: true,
+            message: res.data.msg
+          })
+        }
+      }).catch( (error)=> {
+        this.$message.error({
+          showClose: true,
+          message: error.message
+        })
+      });
+    },
+    syncBasicParam: function (data) {
+      console.log(data)
+      this.$axios({
+        method: 'get',
+        url: `/api/device/config/query/${data.deviceId}/BasicParam`,
+        params: {
+          // channelId: data.deviceId
+        }
+      }).then( (res)=> {
+        if (res.data.code === 0) {
+          this.$message.success({
+            showClose: true,
+            message: `配置已同步，当前心跳间隔： ${res.data.data.BasicParam.HeartBeatInterval} 心跳间隔:${res.data.data.BasicParam.HeartBeatCount}`
           })
         }else {
           this.$message.error({
